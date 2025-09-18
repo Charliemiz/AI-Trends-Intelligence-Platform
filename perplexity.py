@@ -6,7 +6,7 @@ def main():
     # Set up the API endpoint and headers
     url = "https://api.perplexity.ai/chat/completions"
     headers = {
-        "Authorization": f"Bearer {API_KEY}",  # Replace with your actual API key
+        "Authorization": f"Bearer {API_KEY}", 
         "Content-Type": "application/json"
     }
 
