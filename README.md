@@ -1,2 +1,5 @@
 # AI-Trends-Intelligence-Platform
-Explains the latest AI developments across specific sectors
+Run Frontend:
+- cd frontend
+- npm install (install all necessary node packages)
+- npm run dev
