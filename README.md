@@ -8,4 +8,5 @@ Run API on Localhost:
 - cd .. (be at project root)
 - venv\Scripts\activate (or whatever name of virtual environment is)
 - pip install -r requirements.txt
+- cd api
 - fastapi dev main.py
