@@ -1,2 +1,12 @@
 # AI-Trends-Intelligence-Platform
-Explains the latest AI developments across specific sectors
+Run Frontend:
+- cd frontend
+- npm install (install all necessary node packages)
+- npm run dev
+
+Run API on Localhost:
+- cd .. (be at project root)
+- venv\Scripts\activate (or whatever name of virtual environment is)
+- pip install -r requirements.txt
+- cd api
+- fastapi dev main.py
