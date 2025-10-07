@@ -12,4 +12,4 @@ Run Frontend:
 - fastapi dev main.py
 
 # Hosted API URL:
-### https://ai-trends-intelligence-platform-production.up.railway.app/
+### https://ai-trends-intelligence-platform-production.up.railway.app
