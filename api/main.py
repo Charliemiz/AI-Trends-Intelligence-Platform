@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker, Session
 import os
 from dotenv import load_dotenv, find_dotenv
 from perplexity_functions import perplexity_search, perplexity_summarize
+from fastapi.middleware.cors import CORSMiddleware
 
 PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
 
@@ -18,6 +19,14 @@ engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
+)
 
 # For creating a new database session per request
 def get_db():
