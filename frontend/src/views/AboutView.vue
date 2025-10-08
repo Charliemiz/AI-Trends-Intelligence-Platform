@@ -78,7 +78,7 @@ async function searchPerplexity() {
   try {
     const res = await req(
       `/perplexity/search?query=How is the stock market doing today?`,
-      { method: 'POST' }
+      { method: 'GET' }
     )
     result.value = res
   } catch (e) {

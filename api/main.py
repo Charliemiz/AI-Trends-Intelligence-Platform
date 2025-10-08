@@ -65,7 +65,7 @@ def add_summary(url: str, summary: str, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/perplexity/search")
+@app.get("/perplexity/search")
 def api_perplexity_search(query: str, count: int = 5):
     try:
         result = perplexity_search(query, count)
