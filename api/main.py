@@ -21,7 +21,9 @@ SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 app = FastAPI()
 
 ALLOWED_ORIGINS = [
-    "https://ai-trends-intelligence-platform-66rzjvtc2.vercel.app",  # hosted frontend
+    "https://ai-trends-intelligence-platform.vercel.app",
+    "https://ai-trends-intelligence-pl-git-263e86-charlies-projects-a3f87fbc.vercel.app",
+    "https://ai-trends-intelligence-platform-kcanrbje9.vercel.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173"
 ]
