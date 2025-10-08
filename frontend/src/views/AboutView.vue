@@ -23,6 +23,10 @@
         Search Perplexity
       </button>
 
+      <button @click="testPost" class="bg-purple-500 text-white px-4 py-2 rounded">
+        Test POST Request
+      </button>
+
       <div v-if="loading" class="text-gray-500">Loading...</div>
 
       <pre v-if="result" class="bg-gray-100 text-black p-4 rounded overflow-x-auto">{{ result }}</pre>
@@ -87,6 +91,24 @@ async function searchPerplexity() {
     loading.value = false
   }
 }
+
+async function testPost() {
+  const testMessage = 'Hello from POST!'
+  try {
+    const res = await req(
+      `/test-post?message=${encodeURIComponent(testMessage)}`,
+      { 
+        method: 'POST'
+      }
+    )
+    console.log('POST worked!', res)
+    result.value = res
+  } catch (e) {
+    console.error('POST failed:', e.message)
+    error.value = e.message
+  }
+}
+
 </script>
 
 <style scoped>
