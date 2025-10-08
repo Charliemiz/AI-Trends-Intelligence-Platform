@@ -39,9 +39,10 @@ const summary = ref('')
 const result = ref('')
 const error = ref('')
 const loading = ref(false)
+const BASE = import.meta.env.VITE_API_BASE_URL
 
 async function req(path, init) {
-  const res = await fetch(`http://localhost:8000${path}`, {
+  const res = await fetch(`${BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
     ...init,
   })
