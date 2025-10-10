@@ -13,3 +13,10 @@ Run Frontend:
 
 # Hosted API URL:
 ### https://ai-trends-intelligence-platform-production.up.railway.app
+
+
+# (later) update stuff below
+# refresh
+uvicorn app.main:app --reload
+# docs in browser
+http://127.0.0.1:8000/api/ingest
