@@ -1,5 +1,6 @@
 # AI-Trends-Intelligence-Platform
 ### Run Frontend:
+- Need .env file with all secrets
 - cd frontend
 - npm install (install all necessary node packages)
 - npm run dev
