@@ -1,8 +1,13 @@
 # AI-Trends-Intelligence-Platform
-Run Frontend:
+### Run Frontend:
 - cd frontend
 - npm install (install all necessary node packages)
 - npm run dev
+
+### Run Tailwind:
+- cd frontend
+- npx tailwindcss -i ./src/assets/main.css -o ./src/assets/tailwind.css -w
+Now all changes made to frontend css should be processes
 
 # Run API on Localhost:
 - cd .. (be at project root)
@@ -11,11 +16,6 @@ Run Frontend:
 - pip install -r requirements.txt
 - cd api
 - fastapi dev main.py
-
-Run Tailwind:
-- cd frontend
-- npx tailwindcss -i ./src/assets/main.css -o ./src/assets/tailwind.css -w
-Now all changes made to frontend css should be processes
 
 # API BASE URL:
 ### https://ai-trends-intelligence-platform-production.up.railway.app
