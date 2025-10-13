@@ -4,19 +4,36 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 import os
 from dotenv import load_dotenv, find_dotenv
-from perplexity_functions import perplexity_search, perplexity_summarize
+from perplexity_functions import perplexity_search, perplexity_summarize, perplexity_search_rest
 from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
+
+from models import Base, Article
+from services.article_service import add_article, get_all_articles
+import logging
+logging.basicConfig(level=logging.INFO)
 
 PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
 
-load_dotenv(find_dotenv()) 
+BASE_DIR = Path(__file__).resolve().parent          # .../api
+FRONTEND_ENV = BASE_DIR.parent / "frontend" / ".env"  # .../frontend/.env
+
+# load backend .env first if you have one; then load frontend as fallback
+load_dotenv(BASE_DIR / ".env")          # optional
+load_dotenv(FRONTEND_ENV, override=False)
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError("Set DATABASE_URL in .env")
 
-# SQLAlchemy engine + session factory
+# Creates the SQLAlchemy engine, core database connection manager
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+
+# Each instance of SessionLocal is a database session using the engine
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
+# Create tables if they don't exist (for ORM it creates tables for all models that inherit from Base)
+# These models are in our models.py file in this same directory
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -65,14 +82,29 @@ def add_summary(url: str, summary: str, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/perplexity/search")
-def api_perplexity_search(query: str, count: int = 5):
-    try:
-        result = perplexity_search(query, count)
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def api_perplexity_search(query: str, count: int = 5, db: Session = Depends(get_db)):
+    payload = perplexity_search_rest(query, count)
+    items = payload.get("results", [])
+    for item in items:
+        title = item.get("title")
+        url = item.get("url")
+        summary = item.get("description", "")[:500]
+        source = item.get("source", "Unknown")
+        
+        if title and url:
+            try:
+                add_article(db, title=title, url=url, summary=summary, source=source)
+            except Exception as e:
+                logging.error(f"Error adding article {title}: {e}")
+    return {"stored": len(items), "results": items}
 
 @app.post("/test-post")
 def test_post(message: str):
     return {"received": message, "status": "success"}
+
+@app.get("/articles")
+def get_articles(db: Session = Depends(get_db)):
+    articles = get_all_articles(db)
+    return articles
