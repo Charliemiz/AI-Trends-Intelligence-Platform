@@ -15,11 +15,12 @@ logging.basicConfig(level=logging.INFO)
 
 PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
 
-BASE_DIR = Path(__file__).resolve().parent          # .../api
-FRONTEND_ENV = BASE_DIR.parent / "frontend" / ".env"  # .../frontend/.env
+BASE_DIR = Path(__file__).resolve().parent         
+# gets .env directory for the backend
+FRONTEND_ENV = BASE_DIR.parent / "frontend" / ".env"  
 
-# load backend .env first if you have one; then load frontend as fallback
-load_dotenv(BASE_DIR / ".env")          # optional
+# load .env file
+load_dotenv(BASE_DIR / ".env")
 load_dotenv(FRONTEND_ENV, override=False)
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
