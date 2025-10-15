@@ -36,24 +36,6 @@ SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 # These models are in our models.py file in this same directory
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
-
-ALLOWED_ORIGINS = [
-    "https://ai-trends-intelligence-platform.vercel.app",
-    "https://ai-trends-intelligence-pl-git-263e86-charlies-projects-a3f87fbc.vercel.app",
-    "https://ai-trends-intelligence-platform-kcanrbje9.vercel.app",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173"
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-    allow_credentials=True,
-)
-
 # For creating a new database session per request
 def get_db():
     db = SessionLocal()
@@ -62,15 +44,6 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-@app.post("/summary/add")
 def add_summary(url: str, summary: str, db: Session = Depends(get_db)):
     try:
         db.execute(
@@ -83,8 +56,6 @@ def add_summary(url: str, summary: str, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@app.get("/perplexity/search")
 def api_perplexity_search(query: str, count: int = 5, db: Session = Depends(get_db)):
     payload = perplexity_search_rest(query, count)
     items = payload.get("results", [])
@@ -101,11 +72,9 @@ def api_perplexity_search(query: str, count: int = 5, db: Session = Depends(get_
                 logging.error(f"Error adding article {title}: {e}")
     return {"stored": len(items), "results": items}
 
-@app.post("/test-post")
 def test_post(message: str):
     return {"received": message, "status": "success"}
 
-@app.get("/articles")
 def get_articles(db: Session = Depends(get_db)):
     articles = get_all_articles(db)
     return articles

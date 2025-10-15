@@ -15,8 +15,11 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@stackframe/js": "^2.8.41",
     "@tailwindcss/cli": "^4.1.14",
     "@tailwindcss/vite": "^4.1.14",
+    "dotenv": "^17.2.3",
     "vue": "^3.5.22",
     "vue-router": "^4.5.1"
   },
