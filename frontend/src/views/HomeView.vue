@@ -6,6 +6,13 @@
 
 <script setup>
 import ArticleList from './ArticleList.vue';
+import { onMounted } from 'vue';
+import { signInAndGetJwt } from '../stackClient';
+
+onMounted(async () => {
+  const jwt = await signInAndGetJwt('cdmisbach@icloud.com', 'testingpassword123');
+  console.log('JWT:', jwt);
+});
 
 
 </script>
