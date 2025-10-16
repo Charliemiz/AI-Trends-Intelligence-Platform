@@ -26,4 +26,4 @@ jobs:
 
       - name: Run backend script
         run: |
-          python backend/your_script.py
+          python backend/test_db_write.py
