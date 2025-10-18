@@ -1,8 +1,8 @@
-from perplexity_functions import perplexity_search_rest
-from services.article_service import add_article
-from database import SessionLocal
+from api.perplexity_functions import perplexity_search_rest
+from api.database import SessionLocal
+from api.models import Article, Source
+from api.services.article_service import add_article
 import logging
-from models import Article, Source, SourceArticle
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

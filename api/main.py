@@ -4,14 +4,14 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 import os
 from dotenv import load_dotenv, find_dotenv
-from perplexity_functions import perplexity_search, perplexity_summarize, perplexity_search_rest
+from api.perplexity_functions import perplexity_search, perplexity_summarize, perplexity_search_rest
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
-from models import Base, Article
-from services.article_service import add_article, get_all_articles
+from api.models import Base, Article
+from api.services.article_service import add_article, get_all_articles
 import logging
-from database import engine, get_db, Base
+from api.database import engine, get_db, Base
 
 logging.basicConfig(level=logging.INFO)
 
@@ -36,14 +36,6 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
-
-# For creating a new database session per request
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @app.get("/")
 def read_root():
