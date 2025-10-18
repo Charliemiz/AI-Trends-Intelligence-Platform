@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from models import Article
+from database import get_db
 
-def add_article(db: Session, title: str, url: str, summary: str, source: str) -> Article:
-    article = Article(title=title, url=url, summary=summary, source=source)
+def add_article(db: Session, article: Article) -> Article:
     db.add(article)
     db.commit()
     db.refresh(article)

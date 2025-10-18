@@ -54,7 +54,6 @@ def perplexity_search_rest(query: str, count: int = 5):
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "title": {"type": "string"},
                                     "url": {"type": "string"},
                                     "source": {"type": "string"},
                                     "description": {"type": "string"},
