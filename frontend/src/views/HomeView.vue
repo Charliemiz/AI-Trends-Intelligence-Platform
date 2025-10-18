@@ -1,29 +1,29 @@
 <template>
-    <div class="min-h-screen p-4">
-      <h2 class="text-xl font-bold mb-4">Articles</h2>
-      <div class="w-full overflow-x-auto">
-        <table class="border-collapse border border-gray-400 w-full">
-          <thead>
-            <tr class="bg-gray-100 text-black">
-              <th class="border border-gray-400 px-4 py-2 text-left">Title</th>
-              <th class="border border-gray-400 px-4 py-2 text-left">Source</th>
-              <th class="border border-gray-400 px-4 py-2 text-left">Published At</th>
-              <th class="border border-gray-400 px-4 py-2 text-left">URL</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="a in articles" :key="a.id">
-              <td class="border border-gray-400 px-4 py-2">{{ a.title }}</td>
-              <td class="border border-gray-400 px-4 py-2">{{ a.source }}</td>
-              <td class="border border-gray-400 px-4 py-2">{{ a.published_at }}</td>
-              <td class="border border-gray-400 px-4 py-2">
-                <a :href="a.url" target="_blank" class="text-blue-600 underline">View</a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <div class="min-h-screen p-4">
+    <h2 class="text-xl font-bold mb-4">Articles</h2>
+    <div class="w-full overflow-x-auto">
+      <table class="border-collapse border border-gray-400 w-full">
+        <thead>
+          <tr class="bg-gray-100 text-black">
+            <th class="border border-gray-400 px-4 py-2 text-left">Title</th>
+            <th class="border border-gray-400 px-4 py-2 text-left">Sources</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="a in articles" :key="a.id">
+            <td class="border border-gray-400 px-4 py-2">{{ a.title }}</td>
+            <td class="border border-gray-400 px-4 py-2">
+              <div v-for="s in a.sources" :key="s.id">
+                <a :href="s.url" target="_blank" class="text-blue-500 underline">
+                  {{ s.name }}
+                </a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -37,7 +37,7 @@ const articles = ref([])
 const BASE = import.meta.env.VITE_API_BASE_URL
 
 onMounted(async () => {
-  const data = await fetchArticles()        
+  const data = await fetchArticles()
   articles.value = data
 })
 
@@ -92,10 +92,10 @@ async function fetchArticles() {
   try {
     const res = await req('/articles', { method: 'GET' })
     console.log('Fetched articles:', res)
-    return res 
+    return res
   } catch (e) {
     console.error('Failed to fetch articles:', e.message)
-    return [] 
+    return []
   }
 }
 
