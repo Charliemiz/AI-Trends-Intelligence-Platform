@@ -29,5 +29,5 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
         run: |
-          cd backend
-          python scripts/cron_job.py
+          cd api
+          python scripts/cronjob.py
