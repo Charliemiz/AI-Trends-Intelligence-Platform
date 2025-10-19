@@ -1,0 +1,11 @@
+# Vue + Tailwind frontend config for Railway
+[build]
+builder = "Nixpacks"
+buildCommand = "npm install && npm run build"
+
+[start]
+command = "npm run preview"
+
+[env]
+PORT = "5173"
+VITE_API_URL = "https://<your-backend-service>.up.railway.app/api"
