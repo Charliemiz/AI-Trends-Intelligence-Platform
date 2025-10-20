@@ -3,12 +3,11 @@ FROM python:3.13-slim
 # Set working directory
 WORKDIR /code
 
-# Install dependencies
-COPY ./backend/requirements.txt /code/backend/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /code/backend/requirements.txt
+# Copy code and install dependencies
+COPY backend/ ./backend/
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
-# Copy the entire project into the container
-COPY . /code
 
 # Set Python path so 'backend' is importable
 ENV PYTHONPATH=/code

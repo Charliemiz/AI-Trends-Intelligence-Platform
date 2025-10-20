@@ -1,5 +1,5 @@
 import requests
-from config import settings
+from app.config import settings
 
 def fetch_ai_articles(sector: str):
     """
