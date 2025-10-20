@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from app.services.perplexity_service import fetch_ai_articles
-from app.db.crud import save_articles
-from app.db.database import SessionLocal
+from services.perplexity_service import fetch_ai_articles
+from db.crud import save_articles
+from db.database import SessionLocal
 
 router = APIRouter()
 

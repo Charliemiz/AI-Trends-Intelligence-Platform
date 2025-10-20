@@ -1,4 +1,4 @@
-from app.db import models
+from db import models
 from sqlalchemy.orm import Session
 
 # because I'm going to forget: create, read, update, delete (CRUD)

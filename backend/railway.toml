@@ -1,11 +1,5 @@
-# FastAPI backend config for Railway
 [build]
-builder = "Nixpacks"
-buildCommand = "pip install -r requirements.txt"
+builder = "Dockerfile"
 
 [start]
 command = "uvicorn main:app --host 0.0.0.0 --port $PORT"
-
-[env]
-PORT = "8000"
-PYTHONUNBUFFERED = "1"

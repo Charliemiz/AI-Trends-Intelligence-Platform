@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import ingest
+from api.routes import ingest
 
 app = FastAPI(title="AI Insights Dashboard API")
 
