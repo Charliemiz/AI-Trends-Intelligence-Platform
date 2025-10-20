@@ -1,16 +1,33 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Float
-from datetime import datetime
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Table, TIMESTAMP
+from sqlalchemy.orm import relationship
 from app.db.database import Base
+
+article_sources = Table(
+    "article_sources",
+    Base.metadata,
+    Column("article_id", Integer, ForeignKey("articles.id", ondelete="CASCADE"), primary_key=True),
+    Column("source_id", Integer, ForeignKey("sources.id", ondelete="CASCADE"), primary_key=True),
+)
 
 class Article(Base):
     __tablename__ = "articles"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    url = Column(String)
-    content = Column(Text)
-    sector = Column(String)
-    published_at = Column(DateTime, default=datetime.now)
-    summary = Column(Text, nullable=True)
-    impact_score = Column(Float, nullable=True)
-    novelty_score = Column(Float, nullable=True)
-    cluster_id = Column(Integer, nullable=True)
+    title = Column(Text, nullable=False)
+    summary_text = Column(Text, nullable=False)
+    created_at = Column(TIMESTAMP)
+    summary_model = Column(String, default="gpt-4o-mini")
+
+    sources = relationship("Source", secondary=article_sources, back_populates="articles")
+
+
+class Source(Base):
+    __tablename__ = "sources"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(Text, nullable=False)
+    domain = Column(Text)
+    url = Column(Text, unique=True)
+    sector = Column(Text)
+    published_at = Column(TIMESTAMP, nullable=True)
+    scraped_text = Column(Text, nullable=True)
+
+    articles = relationship("Article", secondary=article_sources, back_populates="sources")
