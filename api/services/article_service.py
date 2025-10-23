@@ -1,12 +1,30 @@
 from sqlalchemy.orm import Session
-from models import Article
+from api.models import Article
 
-def add_article(db: Session, title: str, url: str, summary: str, source: str) -> Article:
-    article = Article(title=title, url=url, summary=summary, source=source)
+def add_article(db: Session, article: Article) -> Article:
     db.add(article)
     db.commit()
     db.refresh(article)
     return article
 
 def get_all_articles(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(Article).offset(skip).limit(limit).all()
+    articles = db.query(Article).offset(skip).limit(limit).all()
+
+    # Format the response to include sources
+    result = []
+    for article in articles:
+        result.append({
+            "id": article.id,
+            "title": article.title,
+            "content": article.content,
+            "sources": [
+                {
+                    "id": source.id,
+                    "name": source.name,
+                    "url": source.url
+                }
+                for source in article.sources 
+            ]
+        })
+    
+    return result

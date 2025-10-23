@@ -4,33 +4,16 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 import os
 from dotenv import load_dotenv, find_dotenv
-from perplexity_functions import perplexity_search, perplexity_summarize, perplexity_search_rest
+from api.perplexity_functions import perplexity_search, perplexity_summarize, perplexity_search_rest
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
-from models import Base, Article
-from services.article_service import add_article, get_all_articles
+from api.models import Base, Article
+from api.services.article_service import add_article, get_all_articles
 import logging
+from api.database import engine, get_db, Base
+
 logging.basicConfig(level=logging.INFO)
-
-PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
-
-BASE_DIR = Path(__file__).resolve().parent         
-# gets .env directory for the backend
-FRONTEND_ENV = BASE_DIR.parent / "frontend" / ".env"  
-
-# load .env file
-load_dotenv(BASE_DIR / ".env")
-load_dotenv(FRONTEND_ENV, override=False)
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise RuntimeError("Set DATABASE_URL in .env")
-
-# Creates the SQLAlchemy engine, core database connection manager
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-
-# Each instance of SessionLocal is a database session using the engine
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 # Create tables if they don't exist (for ORM it creates tables for all models that inherit from Base)
 # These models are in our models.py file in this same directory
@@ -53,14 +36,6 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
-
-# For creating a new database session per request
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @app.get("/")
 def read_root():

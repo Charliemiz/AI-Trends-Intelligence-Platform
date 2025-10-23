@@ -1,15 +1,40 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
-from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, create_engine
+from sqlalchemy.orm import declarative_base, relationship, Session
+from api.database import Base
 
 Base = declarative_base()
 
 class Article(Base):
-    __tablename__ = "articles"
+    __tablename__ = 'articles'
+    
+    id = Column(Integer, primary_key=True)
+    title = Column(String)
+    content = Column(Text)
+    
+    # Relationship to sources through the junction table
+    sources = relationship(
+        'Source',
+        secondary='source_articles',
+        back_populates='articles'
+    )
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
-    url = Column(String(500), unique=True, nullable=False)
-    summary = Column(Text)
-    source = Column(String(100))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+class Source(Base):
+    __tablename__ = 'sources'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    url = Column(String)
+    
+    # Relationship to articles through the junction table
+    articles = relationship(
+        'Article',
+        secondary='source_articles',
+        back_populates='sources'
+    )
+
+class SourceArticle(Base):
+    __tablename__ = 'source_articles'
+    
+    id = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey('articles.id'))
+    source_id = Column(Integer, ForeignKey('sources.id'))
