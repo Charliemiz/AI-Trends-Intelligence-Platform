@@ -14,6 +14,7 @@ import logging
 from api.database import engine, get_db, Base
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Create tables if they don't exist (for ORM it creates tables for all models that inherit from Base)
 # These models are in our models.py file in this same directory
@@ -82,5 +83,10 @@ def test_post(message: str):
 
 @app.get("/articles")
 def get_articles(db: Session = Depends(get_db)):
-    articles = get_all_articles(db)
-    return articles
+    try:
+        articles = get_all_articles(db)
+        logger.info(f"Successfully returned {len(articles)} articles")
+        return articles
+    except Exception as e:
+        logger.error(f"Error in get_articles: {e}", exc_info=True)
+        raise
