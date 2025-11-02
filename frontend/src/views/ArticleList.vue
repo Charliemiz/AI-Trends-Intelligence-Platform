@@ -11,7 +11,13 @@
         </thead>
         <tbody>
           <tr v-for="a in articles" :key="a.id">
-            <td class="border border-gray-400 px-4 py-2">{{ a.title }}</td>
+            <td class="border border-gray-400 px-4 py-2">
+              <router-link :to="`/articles/${a.id}`">
+                <span class="text-blue-500 underline cursor-pointer">
+                  {{ a.title }}
+                </span>
+              </router-link>
+            </td>
             <td class="border border-gray-400 px-4 py-2">
               <div v-for="s in a.sources" :key="s.id">
                 <a :href="s.url" target="_blank" class="text-blue-500 underline">
