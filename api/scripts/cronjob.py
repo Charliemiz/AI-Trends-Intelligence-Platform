@@ -1,4 +1,4 @@
-from api.perplexity_functions import perplexity_search_rest
+from api.perplexity_functions import perplexity_search_simple
 from api.database import SessionLocal
 from api.models import Article, Source
 from api.services.article_service import add_article
@@ -10,28 +10,38 @@ logger = logging.getLogger(__name__)
 def main():
     logger.info("Starting cron job...")
     db = SessionLocal()
-    try: 
+    try:
+        query = "Recent AI trends in education sector"
+        
+        logger.info(f"Searching for: {query}")
+        
+        # Get article and sources from Perplexity
+        result = perplexity_search_simple(query)
+
         # Create article object
         article = Article(
-            title="Recent AI Trends",
-            content="Content about recent AI trends...",
+            title=result['title'],
+            content=result['article'],
         )
 
-        # Create source object
-        source = Source(
-            name="Tech News",
-            url="https://technews.example.com/recent-ai-trends"
-        )
-
-        # Establish many-to-many relationship
-        article.sources.append(source)
+        # Create source objects from the search results
+        for source_data in result['sources']:
+            source = Source(
+                name=source_data['title'] or source_data['source'],
+                url=source_data['url']
+            )
+            article.sources.append(source)
         
         # Add to database using your service
         added_article = add_article(db, article)
+
+        logger.info(f"Successfully added article with ID: {added_article.id}")
         
     except Exception as e:
         logger.error(f"Cron job failed: {e}")
         raise
+    finally:
+        db.close()
 
 
 if __name__ == "__main__":

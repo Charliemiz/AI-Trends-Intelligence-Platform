@@ -206,3 +206,90 @@ def perplexity_search_rest(query: str, count: int = 5):
         "query": query,
         "created_at": datetime.datetime.utcnow().isoformat()
     }
+
+def perplexity_search_simple(query: str, count: int = 5):
+    load_dotenv(find_dotenv())
+    api_key = os.getenv("PERPLEXITY_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing PERPLEXITY_API_KEY")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    # Single call to get article with sources
+    payload = {
+        "model": "sonar-pro",
+        "temperature": 0.1,
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a journalist who writes comprehensive articles by synthesizing information from multiple sources. You ONLY use information from the sources you find. You NEVER add information from your general knowledge. Act as a NEUTRAL party."
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Research and write a comprehensive, in-depth article about: {query}\n\n"
+                    f"Your response must include:\n"
+                    f"1. A compelling title (one line)\n"
+                    f"2. A thorough, detailed article (800-1200 words) that deeply explores the topic\n\n"
+                    f"CRITICAL RULES:\n"
+                    f"- Use ONLY information from sources you find\n"
+                    f"- Synthesize information from MULTIPLE sources effectively\n"
+                    f"- Include specific details, quotes, statistics, and examples from the sources\n"
+                    f"- Act as a NEUTRAL party\n"
+                    f"- Do NOT use poetic or creative writing language\n"
+                    f"- Write like a professional, comprehensive news article\n"
+                    f"- Cover different angles and perspectives found in the sources\n\n"
+                    f"Format your response as:\n"
+                    f"TITLE: [your title here]\n\n"
+                    f"ARTICLE:\n[your article here]"
+                )
+            }
+        ]
+    }
+
+    r = requests.post(PERPLEXITY_ENDPOINT, json=payload, headers=headers, timeout=60)
+    r.raise_for_status()
+    data = r.json()
+
+    content = data["choices"][0]["message"]["content"]
+    
+    # Parse title and article from response
+    lines = content.split("\n")
+    title = ""
+    article = ""
+    
+    for i, line in enumerate(lines):
+        if line.startswith("TITLE:"):
+            title = line.replace("TITLE:", "").strip()
+        elif line.startswith("ARTICLE:"):
+            article = "\n".join(lines[i+1:]).strip()
+            break
+    
+    # Fallback if parsing fails
+    if not title:
+        title = f"Article about {query}"
+    if not article:
+        article = content
+
+    # Extract sources from search_results
+    sources = []
+    search_results = data.get("search_results", [])
+    
+    for result in search_results:
+        sources.append({
+            "title": result.get("title", ""),
+            "url": result.get("url", ""),
+            "source": result.get("url", "").split("/")[2] if result.get("url") else ""
+        })
+
+    return {
+        "title": title,
+        "article": article,
+        "sources": sources,
+        "query": query,
+        "created_at": datetime.datetime.now().isoformat()
+    }
+
