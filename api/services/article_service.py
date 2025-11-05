@@ -28,3 +28,24 @@ def get_all_articles(db: Session, skip: int = 0, limit: int = 10):
         })
     
     return result
+
+def get_article_by_id(db: Session, article_id: int) -> Article:
+    article = db.query(Article).filter(Article.id == article_id).first()
+    if not article:
+        return None
+
+    result = {
+        "id": article.id,
+        "title": article.title,
+        "content": article.content,
+        "sources": [
+            {
+                "id": s.id,
+                "name": s.name,
+                "url": s.url,
+            }
+            for s in article.sources
+        ],
+    }
+
+    return result
