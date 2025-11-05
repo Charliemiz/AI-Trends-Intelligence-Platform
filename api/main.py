@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
 from api.models import Base, Article
-from api.services.article_service import add_article, get_all_articles
+from api.services.article_service import add_article, get_all_articles, get_article_by_id
 import logging
 from api.database import engine, get_db, Base
 
@@ -59,24 +59,6 @@ def add_summary(url: str, summary: str, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-
-# @app.get("/perplexity/search")
-# def api_perplexity_search(query: str, count: int = 5, db: Session = Depends(get_db)):
-#     payload = perplexity_search_simple(query, count)
-#     items = payload.get("results", [])
-#     for item in items:
-#         title = item.get("title")
-#         url = item.get("url")
-#         summary = item.get("description", "")[:500]
-#         source = item.get("source", "Unknown")
-        
-#         if title and url:
-#             try:
-#                 add_article(db, title=title, url=url, summary=summary, source=source)
-#             except Exception as e:
-#                 logging.error(f"Error adding article {title}: {e}")
-#     return {"stored": len(items), "results": items}
-
 @app.post("/test-post")
 def test_post(message: str):
     return {"received": message, "status": "success"}
@@ -89,4 +71,13 @@ def get_articles(db: Session = Depends(get_db)):
         return articles
     except Exception as e:
         logger.error(f"Error in get_articles: {e}", exc_info=True)
+        raise
+
+@app.get("/articles/{article_id}")
+def get_article(article_id: int, db: Session = Depends(get_db)):
+    try:
+        article = get_article_by_id(db, article_id)
+        return article
+    except Exception as e:
+        logger.error(f"Error in get_article: {e}", exc_info=True)
         raise
