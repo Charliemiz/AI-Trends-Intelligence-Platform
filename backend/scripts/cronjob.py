@@ -1,7 +1,7 @@
-from api.perplexity_functions import perplexity_search_simple
-from api.database import SessionLocal
-from api.models import Article, Source
-from api.services.article_service import add_article
+from backend.perplexity_functions import perplexity_search_simple
+from backend.database import SessionLocal
+from backend.models import Article, Source
+from backend.services.article_service import add_article
 import logging
 
 logging.basicConfig(level=logging.INFO)

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from api.models import Article
+from backend.models import Article
 
 def add_article(db: Session, article: Article) -> Article:
     db.add(article)

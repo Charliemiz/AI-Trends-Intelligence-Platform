@@ -4,14 +4,14 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 import os
 from dotenv import load_dotenv, find_dotenv
-from api.perplexity_functions import perplexity_search, perplexity_summarize, perplexity_search_simple
+from backend.perplexity_functions import perplexity_search, perplexity_summarize, perplexity_search_simple
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
-from api.models import Base, Article
-from api.services.article_service import add_article, get_all_articles, get_article_by_id
+from backend.models import Base, Article
+from backend.services.article_service import add_article, get_all_articles, get_article_by_id
 import logging
-from api.database import engine, get_db, Base
+from backend.database import engine, get_db, Base
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
