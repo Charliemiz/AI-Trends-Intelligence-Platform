@@ -15,7 +15,7 @@ Now all changes made to frontend css should be processes
 - Make a virtual environment if you don't have one
 - venv\Scripts\activate (or whatever name of virtual environment is)
 - pip install -r requirements.txt
-- cd api
+- cd backend
 - fastapi dev main.py
 
 # API BASE URL:
