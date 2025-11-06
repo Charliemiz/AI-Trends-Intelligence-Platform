@@ -6,7 +6,6 @@
         <thead>
           <tr class="bg-gray-100 text-black">
             <th class="border border-gray-400 px-4 py-2 text-left">Title</th>
-            <th class="border border-gray-400 px-4 py-2 text-left">Sources</th>
           </tr>
         </thead>
         <tbody>
@@ -17,13 +16,6 @@
                   {{ a.title }}
                 </span>
               </router-link>
-            </td>
-            <td class="border border-gray-400 px-4 py-2">
-              <div v-for="sources in a.sources" :key="s.id">
-                <a :href="sources.url" target="_blank" class="text-blue-500 underline">
-                  {{ sources.name }}
-                </a>
-              </div>
             </td>
           </tr>
         </tbody>
