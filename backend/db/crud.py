@@ -35,6 +35,9 @@ def create_article(db: Session, title: str, content: str):
 def get_article_by_id(db: Session, article_id: int):
     return db.query(models.Article).filter(models.Article.id == article_id).first()
 
+def get_all_articles(db: Session):
+    return db.query(models.Article).all()
+
 # -----------------
 # LINK FUNCTIONS
 # -----------------
