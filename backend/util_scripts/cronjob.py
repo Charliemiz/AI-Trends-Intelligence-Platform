@@ -1,7 +1,6 @@
 from backend.services.perplexity_service import perplexity_search_simple
-from backend.db.database import get_db
+from backend.db.database import SessionLocal
 from backend.db.crud import create_article, create_source
-from fastapi import Depends
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -9,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 def main():
     logger.info("Starting cron job...")
-    db = Depends(get_db)
-    
+    db = SessionLocal()
+
     try:
         query = "Recent AI trends in education sector"
         logger.info(f"Searching for: {query}")
