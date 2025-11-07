@@ -36,9 +36,9 @@ onMounted(async () => {
 
 async function fetchArticles() {
   try {
-    const res = await apiRequest('/articles', { method: 'GET' })
-    console.log('Fetched articles:', res)
-    return res
+    const response = await apiRequest('/articles', { method: 'GET' })
+    console.log('Fetched articles:', response)
+    return response
   } catch (e) {
     console.error('Failed to fetch articles:', e.message)
     return []
