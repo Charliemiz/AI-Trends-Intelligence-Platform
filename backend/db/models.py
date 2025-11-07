@@ -25,7 +25,7 @@ class Source(Base):
     
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    url = Column(String)
+    url = Column(String, unique=True, nullable=False)
     
     # Relationship to articles through the junction table
     articles = relationship('Article', secondary=source_articles, back_populates='sources')

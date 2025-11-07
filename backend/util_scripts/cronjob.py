@@ -2,6 +2,7 @@ from backend.services.perplexity_functions import perplexity_search_simple
 from backend.db.database import SessionLocal
 from backend.db.models import Article, Source
 from backend.services.article_service import add_article
+from backend.services.duplicate_source_check import get_or_create_source
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +27,8 @@ def main():
 
         # Create source objects from the search results
         for source_data in result['sources']:
-            source = Source(
+            source = get_or_create_source(
+                db,
                 name=source_data['title'] or source_data['source'],
                 url=source_data['url']
             )
