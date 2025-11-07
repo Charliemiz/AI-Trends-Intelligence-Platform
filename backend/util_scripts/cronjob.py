@@ -26,9 +26,6 @@ def main():
     except Exception as e:
         logger.error(f"Cron job failed: {e}")
         raise
-    finally:
-        db.close()
-
 
 if __name__ == "__main__":
     main()
