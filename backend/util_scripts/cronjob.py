@@ -1,4 +1,4 @@
-from backend.services.perplexity_functions import perplexity_search_simple
+from backend.services.perplexity_service import perplexity_search_simple
 from backend.db.database import SessionLocal
 from backend.db.models import Article, Source
 from backend.services.article_service import add_article
