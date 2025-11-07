@@ -1,8 +1,13 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, create_engine
-from sqlalchemy.orm import declarative_base, relationship, Session
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Table, TIMESTAMP
+from sqlalchemy.orm import relationship
 from backend.database import Base
 
-Base = declarative_base()
+source_articles = Table(
+    "source_articles",
+    Base.metadata,
+    Column("article_id", Integer, ForeignKey("articles.id", ondelete="CASCADE"), primary_key=True),
+    Column("source_id", Integer, ForeignKey("sources.id", ondelete="CASCADE"), primary_key=True),
+)
 
 class Article(Base):
     __tablename__ = 'articles'
@@ -10,13 +15,10 @@ class Article(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     content = Column(Text)
+    created_at = Column(TIMESTAMP)
     
     # Relationship to sources through the junction table
-    sources = relationship(
-        'Source',
-        secondary='source_articles',
-        back_populates='articles'
-    )
+    sources = relationship('Source', secondary=source_articles, back_populates='articles')
 
 class Source(Base):
     __tablename__ = 'sources'
@@ -26,15 +28,4 @@ class Source(Base):
     url = Column(String)
     
     # Relationship to articles through the junction table
-    articles = relationship(
-        'Article',
-        secondary='source_articles',
-        back_populates='sources'
-    )
-
-class SourceArticle(Base):
-    __tablename__ = 'source_articles'
-    
-    id = Column(Integer, primary_key=True)
-    article_id = Column(Integer, ForeignKey('articles.id'))
-    source_id = Column(Integer, ForeignKey('sources.id'))
+    articles = relationship('Article', secondary=source_articles, back_populates='sources')
