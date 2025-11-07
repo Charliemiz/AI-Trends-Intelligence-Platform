@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from backend.services.article_service import add_article, get_all_articles, get_article_by_id
 import logging
-from backend.database import get_db
+from backend.db.database import get_db
 
 router = APIRouter()
 logging.basicConfig(level=logging.INFO)

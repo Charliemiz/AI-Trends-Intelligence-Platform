@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from backend.models import Article
+from backend.db.models import Article
 
 def add_article(db: Session, article: Article) -> Article:
     db.add(article)
@@ -32,7 +32,7 @@ def get_all_articles(db: Session, skip: int = 0, limit: int = 10):
 def get_article_by_id(db: Session, article_id: int) -> Article:
     article = db.query(Article).filter(Article.id == article_id).first()
     if not article:
-        return None
+        return None # type: ignore
 
     result = {
         "id": article.id,
@@ -48,4 +48,4 @@ def get_article_by_id(db: Session, article_id: int) -> Article:
         ],
     }
 
-    return result
+    return result # type: ignore

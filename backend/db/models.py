@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Table, TIMESTAMP
 from sqlalchemy.orm import relationship
-from backend.database import Base
+from backend.db.database import Base
 
 source_articles = Table(
     "source_articles",
@@ -15,7 +15,7 @@ class Article(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     content = Column(Text)
-    created_at = Column(TIMESTAMP)
+    # created_at = Column(TIMESTAMP) # implement later
     
     # Relationship to sources through the junction table
     sources = relationship('Source', secondary=source_articles, back_populates='articles')
