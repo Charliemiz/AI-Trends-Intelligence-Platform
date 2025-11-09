@@ -6,6 +6,30 @@ from backend.db import models
 # -----------------
 # SOURCE FUNCTIONS
 # -----------------
+def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
+    """
+    Take in a list of dictionaries with 'name' and 'url' keys,
+    return a list of Source objects, creating any that don't already exist.
+    """
+    urls = [s["url"] for s in sources_data]
+
+    # Query for sources that already exist
+    existing_sources = db.query(models.Source).filter(models.Source.url.in_(urls)).all()
+    existing_urls = {source.url: source.id for source in existing_sources}
+
+    sourceIds = []
+    for source in sources_data:
+        if source["url"] in existing_urls:
+            sourceIds.append(existing_urls[source["url"]])
+        else:
+            new_source = models.Source(name=source["name"], url=source["url"])
+            db.add(new_source)
+            db.refresh(new_source)
+            sourceIds.append(new_source.id)
+    
+    db.commit()
+    return sourceIds
+
 def create_source(db: Session, name: str, url: str):
     existing = db.query(models.Source).filter(models.Source.url == url).first()
     if existing:
@@ -25,6 +49,12 @@ def get_source_by_id(db: Session, source_id: int):
 # -----------------
 # ARTICLE FUNCTIONS
 # -----------------
+def create_article_with_sources(db: Session, title: str, content: str, sources_data: list[dict]):
+    article = create_article(db=db, title=title, content=content)
+
+    # Get or create all the sources and get their IDs
+    sources = get_or_create_sources_bulk(db=db, sources_data=sources_data)
+
 def create_article(db: Session, title: str, content: str):
     art = models.Article(title=title, content=content)
     db.add(art)
