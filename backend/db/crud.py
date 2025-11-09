@@ -53,7 +53,14 @@ def create_article_with_sources(db: Session, title: str, content: str, sources_d
     article = create_article(db=db, title=title, content=content)
 
     # Get or create all the sources and get their IDs
+    # This step will eliminate duplicates added to the db
     sources = get_or_create_sources_bulk(db=db, sources_data=sources_data)
+
+    # Link sources to the article
+    for source_id in sources:
+        link_article_to_source(db=db, article_id=article.id, source_id=source_id)
+
+    return article
 
 def create_article(db: Session, title: str, content: str):
     art = models.Article(title=title, content=content)
