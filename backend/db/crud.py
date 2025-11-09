@@ -30,16 +30,6 @@ def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
     db.commit()
     return sourceIds
 
-def create_source(db: Session, name: str, url: str):
-    existing = db.query(models.Source).filter(models.Source.url == url).first()
-    if existing:
-        return existing
-    src = models.Source(name=name, url=url)
-    db.add(src)
-    db.commit()
-    db.refresh(src)
-    return src
-
 def get_source_by_url(db: Session, url: str):
     return db.query(models.Source).filter(models.Source.url == url).first()
 
