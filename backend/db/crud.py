@@ -33,7 +33,23 @@ def create_article(db: Session, title: str, content: str):
     return art
 
 def get_article_by_id(db: Session, article_id: int):
-    return db.query(models.Article).filter(models.Article.id == article_id).first()
+    article = db.query(models.Article).filter(models.Article.id == article_id).first()
+
+    result = {
+        "id": article.id,
+        "title": article.title,
+        "content": article.content,
+        "sources": [
+            {
+                "id": s.id,
+                "name": s.name,
+                "url": s.url,
+            }
+            for s in article.sources
+        ],
+    }
+
+    return result
 
 def get_all_articles(db: Session):
     return db.query(models.Article).all()
