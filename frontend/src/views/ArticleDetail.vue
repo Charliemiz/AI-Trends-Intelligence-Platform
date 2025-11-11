@@ -10,7 +10,7 @@
         <span class="flex text-3xl font-semibold text-blue-500 py-4">Sources:</span>
         <div v-for="s in article.sources" :key="s.id">
             <a :href="s.url" target="_blank" class="text-blue-500 underline">
-                {{ s.name }}
+                {{ s.title }}
             </a>
         </div>
     </div>
