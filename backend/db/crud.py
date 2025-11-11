@@ -24,7 +24,7 @@ def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
         else:
             new_source = models.Source(title=source["title"], url=source["url"])
             db.add(new_source)
-            db.refresh(new_source)
+            db.flush()
             sourceIds.append(new_source.id)
     
     db.commit()
