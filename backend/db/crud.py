@@ -8,7 +8,7 @@ from backend.db import models
 # -----------------
 def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
     """
-    Take in a list of dictionaries with 'name' and 'url' keys,
+    Take in a list of dictionaries with 'title' and 'url' keys,
     return a list of Source objects, creating any that don't already exist.
     """
     urls = [s["url"] for s in sources_data]
@@ -22,7 +22,7 @@ def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
         if source["url"] in existing_urls:
             sourceIds.append(existing_urls[source["url"]])
         else:
-            new_source = models.Source(name=source["name"], url=source["url"])
+            new_source = models.Source(title=source["title"], url=source["url"])
             db.add(new_source)
             db.refresh(new_source)
             sourceIds.append(new_source.id)
@@ -69,7 +69,7 @@ def get_article_by_id(db: Session, article_id: int):
         "sources": [
             {
                 "id": s.id,
-                "name": s.name,
+                "title": s.title,
                 "url": s.url,
             }
             for s in article.sources

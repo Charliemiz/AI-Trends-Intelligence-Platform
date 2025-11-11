@@ -24,7 +24,7 @@ class Source(Base):
     __tablename__ = 'sources'
     
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    title = Column(String)
     url = Column(String)
     
     # Relationship to articles through the junction table

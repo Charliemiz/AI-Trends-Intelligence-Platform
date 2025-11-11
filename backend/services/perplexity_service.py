@@ -1,6 +1,6 @@
 from dotenv import find_dotenv, load_dotenv
 import requests
-import os, json, sys, datetime
+import os, datetime
 from perplexity import *
 
 PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
