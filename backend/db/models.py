@@ -26,6 +26,10 @@ class Source(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     url = Column(String, unique=True, nullable=False)
+    domain = Column(String)  # e.g., "example.com"
+    sector = Column(String)  # e.g., "Technology", "Government", etc.
+    published_at = Column(TIMESTAMP)  # When the source content was published
+    scraped_text = Column(Text)  # Full text content from the source
     
     # Relationship to articles through the junction table
     articles = relationship('Article', secondary=source_articles, back_populates='sources')
