@@ -26,7 +26,7 @@ def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
         else:
             # Create new source with all available fields
             new_source_data = {
-                "name": source["name"],
+                "title": source["title"],
                 "url": source["url"]
             }
             
@@ -35,10 +35,6 @@ def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
                 new_source_data["domain"] = source["domain"]
             if "sector" in source:
                 new_source_data["sector"] = source["sector"]
-            if "published_at" in source:
-                new_source_data["published_at"] = source["published_at"]
-            if "scraped_text" in source:
-                new_source_data["scraped_text"] = source["scraped_text"]
             
             new_source = models.Source(**new_source_data)
             db.add(new_source)

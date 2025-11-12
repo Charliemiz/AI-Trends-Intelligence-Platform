@@ -22,11 +22,11 @@ def main():
         
         sources_data = []
         for source in result['sources']:
-            source_name = source.get("title") or source.get("name", "Unknown Source")
+            source_name = source.get("title") 
             source_url = source["url"]
             
             sources_data.append({
-                "name": source_name,
+                "title": source_name,
                 "url": source_url,
                 "domain": extract_domain(source_url),
                 "sector": sector  # All sources from this query get the same sector
