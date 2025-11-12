@@ -4,8 +4,6 @@
 
 name: Build and deploy Python app to Azure Web App - fastapi-trends-app
 
-name: Build and deploy Python app to Azure Web App - fastapi-trends-app
-
 on:
   push:
     branches:
@@ -57,3 +55,4 @@ jobs:
           app-name: 'fastapi-trends-app'
           slot-name: 'Production'
           startup-command: 'python -m uvicorn main:app --host 0.0.0.0 --port 8000'
+
