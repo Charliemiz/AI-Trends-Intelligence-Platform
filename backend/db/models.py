@@ -15,7 +15,6 @@ class Article(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     content = Column(Text)
-    # created_at = Column(TIMESTAMP) # implement later
     
     # Relationship to sources through the junction table
     sources = relationship('Source', secondary=source_articles, back_populates='articles')
@@ -24,8 +23,10 @@ class Source(Base):
     __tablename__ = 'sources'
     
     id = Column(Integer, primary_key=True)
-    title = Column(String)
-    url = Column(String)
+    title = Column(String)  
+    url = Column(String, unique=True, nullable=False)
+    domain = Column(String)  
+    sector = Column(String)  
     
     # Relationship to articles through the junction table
     articles = relationship('Article', secondary=source_articles, back_populates='sources')

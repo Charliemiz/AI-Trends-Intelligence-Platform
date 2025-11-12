@@ -18,16 +18,17 @@ def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
     existing_urls = {source.url: source.id for source in existing_sources}
 
     sourceIds = []
+    new_sources = []  # Collect new sources to add in batch
+    
     for source in sources_data:
         if source["url"] in existing_urls:
             sourceIds.append(existing_urls[source["url"]])
         else:
-            new_source = models.Source(title=source["title"], url=source["url"])
+            new_source = models.Source(title=source["title"], url=source["url"], domain=source["domain"], sector=source["sector"])
             db.add(new_source)
             db.flush()
             sourceIds.append(new_source.id)
     
-    db.commit()
     return sourceIds
 
 def get_source_by_url(db: Session, url: str):

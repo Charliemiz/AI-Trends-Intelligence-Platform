@@ -225,7 +225,8 @@ def perplexity_search_simple(query: str, count: int = 5):
         "messages": [
             {
                 "role": "system",
-                "content": "You are a journalist who writes comprehensive articles by synthesizing information from multiple sources. You ONLY use information from the sources you find. You NEVER add information from your general knowledge. Act as a NEUTRAL party."
+                        "content": f"Find the top {count} recent news articles about: {query}. "
+                    "For each article, provide title, url, source, description, and published_at (ISO 8601 or null)."
             },
             {
                 "role": "user",
