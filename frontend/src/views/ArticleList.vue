@@ -36,7 +36,7 @@ onMounted(async () => {
 
 async function fetchArticles() {
   try {
-    const response = await apiRequest('/articles', { method: 'GET' })
+    const response = await apiRequest('/api/articles', { method: 'GET' })
     console.log('Fetched articles:', response)
     return response
   } catch (e) {

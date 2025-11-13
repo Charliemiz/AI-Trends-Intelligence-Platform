@@ -32,7 +32,7 @@ onMounted(async () => {
 
 async function fetchArticleById(id) {
     try {
-        const res = await apiRequest(`/articles/${id}`, { method: 'GET' })
+        const res = await apiRequest(`/api/articles/${id}`, { method: 'GET' })
         console.log('Fetched article:', res)
         return res
     } catch (e) {

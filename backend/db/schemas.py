@@ -29,3 +29,24 @@ class ArticleListSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ChatMessage(BaseModel):
+    message: str
+
+class SessionCreateRequest(BaseModel):
+    """Request to create a new chat session for an article."""
+    article_id: int
+
+class SessionResponse(BaseModel):
+    """Response containing session ID."""
+    session_id: str
+
+class ChatRequest(BaseModel):
+    """Request to send a message in a session."""
+    session_id: str
+    message: str
+
+class ChatResponse(BaseModel):
+    """Response from the AI analyst."""
+    response: str
+    messages: list[dict]  # Full chat history after response

@@ -12,8 +12,8 @@ class Settings:
     if not DATABASE_URL:
         raise ValueError("Missing DATABASE_URL environment variable.")
     
-    # OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    # if not OPENAI_API_KEY:
-    #     raise ValueError("Missing OPENAI_API_KEY environment variable.")
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    if not OPENAI_API_KEY:
+        raise ValueError("Missing OPENAI_API_KEY environment variable.")
     
 settings = Settings()
