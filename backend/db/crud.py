@@ -1,3 +1,4 @@
+from typing import cast
 from sqlalchemy.orm import Session
 from backend.db import models
 
@@ -18,8 +19,7 @@ def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
     existing_urls = {source.url: source.id for source in existing_sources}
 
     sourceIds = []
-    new_sources = []  # Collect new sources to add in batch
-    
+        
     for source in sources_data:
         if source["url"] in existing_urls:
             sourceIds.append(existing_urls[source["url"]])
@@ -48,8 +48,9 @@ def create_article_with_sources(db: Session, title: str, content: str, sources_d
     sources = get_or_create_sources_bulk(db=db, sources_data=sources_data)
 
     # Link sources to the article
+    # Extract article_id as int to satisfy type checker
     for source_id in sources:
-        link_article_to_source(db=db, article_id=article.id, source_id=source_id)
+        link_article_to_source(db=db, article_id=cast(int, article.id), source_id=source_id)
 
     return article
 
@@ -60,24 +61,9 @@ def create_article(db: Session, title: str, content: str):
     db.refresh(art)
     return art
 
-def get_article_by_id(db: Session, article_id: int):
+def get_article_by_id(db: Session, article_id: int): 
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
-
-    result = {
-        "id": article.id,
-        "title": article.title,
-        "content": article.content,
-        "sources": [
-            {
-                "id": s.id,
-                "title": s.title,
-                "url": s.url,
-            }
-            for s in article.sources
-        ],
-    }
-
-    return result
+    return article
 
 def get_all_articles(db: Session):
     return db.query(models.Article).all()
