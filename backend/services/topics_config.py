@@ -1,5 +1,5 @@
 """
-Topic Configuration
+Topic/Sector Configuration and Categorization
 """
 
 # Define all sectors with their search tags/keywords
@@ -148,9 +148,12 @@ SECTOR_CONFIG = {
     }
 }
 
+# ==========================================
+# FUNCTIONS FOR TOPIC ROTATION
+# ==========================================
 
 def get_enabled_sectors():
-    """Get list of enabled sectors"""
+    """Get list of enabled sectors for rotation"""
     return [sector for sector, config in SECTOR_CONFIG.items() if config["enabled"]]
 
 
@@ -162,3 +165,30 @@ def get_sector_tags(sector):
 def get_sector_config(sector):
     """Get complete config for a sector"""
     return SECTOR_CONFIG.get(sector, {})
+
+# ==========================================
+# FUNCTIONS FOR QUERY CATEGORIZATION
+# ==========================================
+
+def categorize_sector(query: str) -> str:
+    """
+    Categorize a query into a sector by matching keywords.
+    Returns sector name or "General" if no match.
+    
+    Args:
+        query: Search query string
+        
+    Returns:
+        Sector name (e.g., "AI", "Healthcare") or "General"
+    """
+    query_lower = query.lower()
+    
+    # Check each sector's keywords
+    for sector, config in SECTOR_CONFIG.items():
+        keywords = config.get("tags", [])
+        for keyword in keywords:
+            if keyword in query_lower:
+                return sector
+    
+    # No match found
+    return "General"

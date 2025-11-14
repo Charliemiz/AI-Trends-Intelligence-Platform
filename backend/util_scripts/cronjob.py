@@ -1,24 +1,10 @@
-import sys
-from pathlib import Path
-
-# Add project root to path
-current_dir = Path(__file__).resolve().parent
-project_root = current_dir
-while project_root != project_root.parent:
-    if (project_root / 'backend').exists():
-        break
-    project_root = project_root.parent
-
-sys.path.insert(0, str(project_root))
-
-
 from backend.services.perplexity_service import perplexity_search_simple
 from backend.services.extract_domain import extract_domain
-from backend.services.categorize_sector import categorize_sector
+from backend.services.topics_config import categorize_sector
 from backend.db.database import SessionLocal
 from backend.db.crud import create_article_with_sources
-from backend.queuery_expermintation.topic_rotation import TopicRotationManager
-from backend.queuery_expermintation.topics_config import get_enabled_sectors, get_sector_tags
+from backend.services.topic_rotation import TopicRotationManager
+from backend.services.topics_config import get_enabled_sectors, get_sector_tags
 from backend.services.perplexity_service import perplexity_search_trends
 import logging
 
