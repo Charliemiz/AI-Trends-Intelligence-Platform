@@ -342,6 +342,8 @@ def perplexity_search_trends(sector: str, tags: list, count: int = 3):
                     f"- Topics must be SPECIFIC (not generic)\n"
                     f"- Topics must be NEWSWORTHY (actual events, announcements, developments)\n"
                     f"- Topics must be about or in somewhat related to AI\n"
+                    f"- Topics must be be the same\n"
+                    f"- Topics must 3 distinct topics\n"
                     f"- List ONLY the topic titles, one per line\n"
                     f"- No descriptions, no explanations, no numbering\n"
                     f"- Each topic should be 5-15 words\n\n"

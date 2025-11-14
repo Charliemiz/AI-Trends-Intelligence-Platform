@@ -30,6 +30,7 @@ def main():
     db = SessionLocal()
 
     try:
+        #topic_rotation_state.json location, (current topic state management)
         state_file = project_root / "backend" / "util_scripts" / "topic_rotation_state.json"
         
         # Get enabled sectors
@@ -38,36 +39,44 @@ def main():
         # Create rotation manager
         manager = TopicRotationManager(str(state_file))
         manager.initialize_topics(enabled_sectors)
+
+        #Get current topic in rotation
         topic = manager.get_next_topic()
+        #Get tags
+        tags = get_sector_tags(topic)
 
-        query = f"Recent AI trends in {topic} sector"
-        logger.info(f"Searching for: {query}")
+        # Find trending topics
+        trending_topics = perplexity_search_trends(topic, tags, count=3)
 
-        result = perplexity_search_simple(query)
-        sector = categorize_sector(query)
-        logger.info(f"Query categorized as sector: {sector}")
+        for trend in trending_topics:
+            query = f"Write an article summarizing and explaining {trend}"
+            logger.info(f"Searching for: {query}")
+
+            result = perplexity_search_simple(query)
+            sector = categorize_sector(query)
+            # logger.info(f"Query categorized as sector: {sector}")
         
-        sources_data = []
-        for source in result['sources']:
-            source_name = source.get("title") 
-            source_url = source["url"]
+            sources_data = []
+            for source in result['sources']:
+                source_name = source.get("title") 
+                source_url = source["url"]
+                
+                sources_data.append({
+                    "title": source_name,
+                    "url": source_url,
+                    "domain": extract_domain(source_url),
+                    "sector": sector  # All sources from this query get the same sector
+                })
             
-            sources_data.append({
-                "title": source_name,
-                "url": source_url,
-                "domain": extract_domain(source_url),
-                "sector": sector  # All sources from this query get the same sector
-            })
-        
-        # Create article with sources
-        article = create_article_with_sources(
-            db=db,
-            title=result['title'],
-            content=result['article'],
-            sources_data=sources_data
-        )
+            # Create article with sources
+            article = create_article_with_sources(
+                db=db,
+                title=result['title'],
+                content=result['article'],
+                sources_data=sources_data
+            )
 
-        logger.info(f"Successfully added article with ID: {article.id}")
+            logger.info(f"Successfully added article with ID: {article.id}")
         
     except Exception as e:
         logger.error(f"Cron job failed: {e}")
