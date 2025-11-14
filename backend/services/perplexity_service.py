@@ -294,3 +294,95 @@ def perplexity_search_simple(query: str, count: int = 5):
         "created_at": datetime.datetime.now().isoformat()
     }
 
+
+def perplexity_search_trends(sector: str, tags: list, count: int = 3):
+    """
+    Find the top trending topics in a sector
+    
+    Args:
+        sector: The sector name (e.g., "AI", "Healthcare")
+        tags: List of tags/keywords for the sector
+        count: Number of trending topics to find (default: 3)
+        
+    Returns:
+        List of trending topic titles
+    """
+    load_dotenv(find_dotenv())
+    api_key = os.getenv("PERPLEXITY_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing PERPLEXITY_API_KEY")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    # Create query with sector and tags
+    tags_str = ", ".join(tags)  
+    query = f"What are the top {count} most trending and newsworthy topics in {sector}?"
+
+    payload = {
+        "model": "sonar-pro",
+        "temperature": 0.1,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    f"You are a trend analyst specializing in {sector}. "
+                    f"Find the most current, trending, and newsworthy topics related to: {tags_str} as they concern to AI."
+                )
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Find the top {count} most trending topics in {sector} right now.\n\n"
+                    f"Focus on topics related to: {tags_str}\n\n"
+                    f"CRITICAL RULES:\n"
+                    f"- Topics must be CURRENT and TRENDING (last 30 days)\n"
+                    f"- Topics must be SPECIFIC (not generic)\n"
+                    f"- Topics must be NEWSWORTHY (actual events, announcements, developments)\n"
+                    f"- Topics must be about or in somewhat related to AI\n"
+                    f"- List ONLY the topic titles, one per line\n"
+                    f"- No descriptions, no explanations, no numbering\n"
+                    f"- Each topic should be 5-15 words\n\n"
+                    f"Format your response as:\n"
+                    f"[Topic 1]\n"
+                    f"[Topic 2]\n"
+                    f"[Topic 3]"
+                )
+            }
+        ]
+    }
+
+    r = requests.post(PERPLEXITY_ENDPOINT, json=payload, headers=headers, timeout=60)
+    r.raise_for_status()
+    data = r.json()
+
+    content = data["choices"][0]["message"]["content"]
+    
+    # Parse topics from response
+    lines = [line.strip() for line in content.split("\n") if line.strip()]
+    
+    trending_topics = []
+    for line in lines[:count * 2]:  # Look at twice as many lines to be safe
+        # Remove common prefixes (1., •, -, *, etc.)
+        cleaned = line.lstrip('0123456789.-•*# \t')
+        
+        # Remove "Topic:" or similar prefixes
+        if ':' in cleaned:
+            cleaned = cleaned.split(':', 1)[1].strip()
+        
+        # Must be substantial (not just a word)
+        if cleaned and len(cleaned) > 15 and len(cleaned) < 200:
+            trending_topics.append(cleaned)
+        
+        if len(trending_topics) >= count:
+            break
+    
+    # Fallback if we didn't find enough topics
+    if len(trending_topics) < count:
+        print(f"⚠️  Only found {len(trending_topics)} topics, using fallback")
+        while len(trending_topics) < count:
+            trending_topics.append(f"Recent developments in {sector} - {tags[len(trending_topics) % len(tags)]}")
+    
+    return trending_topics[:count]
