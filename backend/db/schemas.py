@@ -34,8 +34,11 @@ class ChatMessage(BaseModel):
     message: str
 
 class SessionCreateRequest(BaseModel):
-    """Request to create a new chat session for an article."""
+    """Request to create a new chat session for an article, with context."""
     article_id: int
+    article_title: str | None = None
+    article_content: str | None = None
+    sources: list[dict] = []
 
 class SessionResponse(BaseModel):
     """Response containing session ID."""

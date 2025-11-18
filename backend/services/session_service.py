@@ -12,12 +12,18 @@ import uuid
 SESSIONS = {}
 
 def create_session(article_id: int) -> str:
-    """Create a new session for an article."""
+    """Create a new session for an article. Accepts optional context."""
+    return _create_session_with_context(article_id)
+
+def _create_session_with_context(article_id: int, article_title: str = None, article_content: str = None, sources: list = None) -> str:
     session_id = str(uuid.uuid4())
     SESSIONS[session_id] = {
         "article_id": article_id,
+        "article_title": article_title,
         "messages": [],
         "created_at": datetime.now(),
+        "article_content": article_content,
+        "sources": sources or [],
     }
     return session_id
 
