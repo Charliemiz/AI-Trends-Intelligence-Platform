@@ -1,12 +1,5 @@
-import sys
-import os
 from pathlib import Path
 from urllib.parse import urlparse
-
-script_dir = Path(__file__).resolve().parent  # Current directory
-project_root = script_dir.parent.parent       # Go up to project root
-sys.path.insert(0, str(project_root))
-
 from backend.db.database import SessionLocal
 import logging
 
