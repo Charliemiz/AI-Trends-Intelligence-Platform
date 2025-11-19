@@ -17,7 +17,7 @@ def main():
 
     try:
         #topic_rotation_state.json location, (current topic state management)
-        state_file = project_root / "backend" / "util_scripts" / "topic_rotation_state.json"
+        state_file = Path(__file__).parent / "topic_rotation_state.json"
         
         # Get enabled sectors
         enabled_sectors = get_enabled_sectors()
