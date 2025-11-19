@@ -54,7 +54,7 @@
           type="text"
           placeholder="Ask a question..."
           :disabled="isLoading"
-          class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-blue-300 disabled:bg-gray-100"
+          class="flex-1 border rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring focus:ring-blue-300 disabled:bg-gray-100"
         />
         <button
           type="submit"
@@ -115,11 +115,20 @@ watch([isArticleDetail, articleId], async () => {
   if (isArticleDetail.value && articleId.value && !sessionId.value) {
     sessionCreating.value = true;
     try {
+      // Fetch article for context
+      const article = await apiRequest(`/api/articles/${articleId.value}`, { method: "GET" });
       const response = await apiRequest("/api/chat/session", {
         method: "POST",
-        body: JSON.stringify({ article_id: articleId.value })
+        body: JSON.stringify({
+          article_id: articleId.value,
+          article_title: article?.title || "",
+          article_content: article?.content || "",
+          sources: article?.sources || []
+        })
       });
       sessionId.value = response.session_id;
+      // Fetch article title for greeting
+      await addInitialGreeting(articleId.value);
       console.log(`Chat session created: ${sessionId.value} for article ${articleId.value}`);
     } catch (err) {
       console.error("Failed to create chat session:", err.message);
@@ -135,11 +144,20 @@ onMounted(async () => {
   if (isArticleDetail.value && articleId.value && !sessionId.value) {
     sessionCreating.value = true;
     try {
+      // Fetch article for context
+      const article = await apiRequest(`/api/articles/${articleId.value}`, { method: "GET" });
       const response = await apiRequest("/api/chat/session", {
         method: "POST",
-        body: JSON.stringify({ article_id: articleId.value })
+        body: JSON.stringify({
+          article_id: articleId.value,
+          article_title: article?.title || "",
+          article_content: article?.content || "",
+          sources: article?.sources || []
+        })
       });
       sessionId.value = response.session_id;
+      // Fetch article title for greeting
+      await addInitialGreeting(articleId.value);
       console.log(`Chat session created on mount: ${sessionId.value} for article ${articleId.value}`);
     } catch (err) {
       console.error("Failed to create chat session:", err.message);
@@ -163,6 +181,29 @@ onBeforeUnmount(async () => {
     }
   }
 });
+
+// Helper function to fetch article title and add initial greeting
+const addInitialGreeting = async (id) => {
+  try {
+    const article = await apiRequest(`/api/articles/${id}`, { method: "GET" });
+    const title = article?.title || "this article";
+    messages.value = [
+      {
+        role: "assistant",
+        content: `Hello! I'm here to answer any questions about "${title}".`
+      }
+    ];
+  } catch (err) {
+    console.error("Failed to fetch article title for greeting:", err.message);
+    // Fallback greeting if fetch fails
+    messages.value = [
+      {
+        role: "assistant",
+        content: "Hello! I'm here to answer any questions about this article."
+      }
+    ];
+  }
+};
 
 const sendMessage = async () => {
   if (!input.value.trim() || !sessionId.value) return;

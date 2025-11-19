@@ -48,9 +48,15 @@ async def chat_with_analyst(data: ChatMessage):
 
 @router.post("/chat/session", response_model=SessionResponse)
 def create_chat_session(request: SessionCreateRequest):
-    """Create a new chat session for an article."""
+    """Create a new chat session for an article, with context."""
     try:
-        session_id = create_session(request.article_id)
+        from backend.services.session_service import _create_session_with_context
+        session_id = _create_session_with_context(
+            article_id=request.article_id,
+            article_title=getattr(request, "article_title", None),
+            article_content=request.article_content,
+            sources=request.sources
+        )
         logger.info(f"Created session {session_id} for article {request.article_id}")
         return {"session_id": session_id}
     except Exception as e:
@@ -79,7 +85,8 @@ async def send_message(request: ChatRequest):
         response = openai_chat_service(
             message=request.message,
             conversation_history=messages,
-            article_id=article_id
+            article_id=article_id,
+            session_id=request.session_id
         )
         
         # Ensure response is a string
