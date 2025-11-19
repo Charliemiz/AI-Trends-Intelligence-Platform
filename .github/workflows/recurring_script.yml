@@ -1,4 +1,4 @@
-name: Run script every hour
+name: Recurring Script
 
 on:
   schedule:
