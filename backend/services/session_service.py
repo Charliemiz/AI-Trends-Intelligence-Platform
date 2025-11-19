@@ -11,11 +11,7 @@ import uuid
 # Format: { session_id: { "article_id": int, "messages": [...], "created_at": datetime } }
 SESSIONS = {}
 
-def create_session(article_id: int) -> str:
-    """Create a new session for an article. Accepts optional context."""
-    return _create_session_with_context(article_id)
-
-def _create_session_with_context(article_id: int, article_title: str = None, article_content: str = None, sources: list = None) -> str:
+def create_session_with_context(article_id: int, article_title: str, article_content: str, sources: list) -> str:
     session_id = str(uuid.uuid4())
     SESSIONS[session_id] = {
         "article_id": article_id,

@@ -15,6 +15,7 @@ class Article(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     content = Column(Text)
+    created_at = Column(TIMESTAMP)
     
     # Relationship to sources through the junction table
     sources = relationship('Source', secondary=source_articles, back_populates='articles')
