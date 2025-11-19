@@ -7,6 +7,7 @@ from backend.services.topic_rotation import TopicRotationManager
 from backend.services.topics_config import get_enabled_sectors, get_sector_tags
 from backend.services.perplexity_service import perplexity_search_trends
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ def main():
 
     try:
         #topic_rotation_state.json location, (current topic state management)
-        state_file = project_root / "backend" / "util_scripts" / "topic_rotation_state.json"
+        state_file = os.path.join(os.path.dirname(__file__), "topic_rotation_state.json")
         
         # Get enabled sectors
         enabled_sectors = get_enabled_sectors()
