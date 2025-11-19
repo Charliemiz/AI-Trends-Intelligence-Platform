@@ -4,15 +4,6 @@ Topic/Sector Configuration and Categorization
 
 # Define all sectors with their search tags/keywords
 SECTOR_CONFIG = {
-    "AI": {
-        "tags": [
-            "ai", "artificial intelligence", "machine learning", "deep learning",
-            "neural networks", "llm", "gpt", "generative ai", "chatgpt",
-            "computer vision", "natural language processing", "ai ethics",
-            "ai regulation", "ai models", "transformer models"
-        ],
-        "enabled": True
-    },
     "Education": {
         "tags": [
             "education", "learning", "teaching", "school", "university",
