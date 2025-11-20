@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class SourceSchema(BaseModel):
     """Schema for Source objects in responses."""
@@ -16,7 +17,7 @@ class ArticleSchema(BaseModel):
     id: int
     title: str
     content: str
-    created_at: str
+    created_at: datetime
     sources: list[SourceSchema] = []
 
     class Config:

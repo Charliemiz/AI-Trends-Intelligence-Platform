@@ -15,6 +15,7 @@ router = APIRouter()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# get routes (webpages)
 
 @router.get("/")
 def read_root():
@@ -41,6 +42,8 @@ def get_article(article_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error in get_article: {e}", exc_info=True)
         raise
+
+# post routes (chat interactions)
 
 @router.post("/chat")
 async def chat_with_analyst(data: ChatMessage):
