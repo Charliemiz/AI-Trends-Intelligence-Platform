@@ -8,3 +8,4 @@ python-dotenv
 perplexityai
 fastapi[standard]
 openai
+alembic
