@@ -1,12 +1,13 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class SourceSchema(BaseModel):
     """Schema for Source objects in responses."""
     id: int
     title: str
     url: str
-    domain: str | None = None
-    sector: str | None = None
+    domain: str
+    sector: str
 
     class Config:
         from_attributes = True  # Allow conversion from SQLAlchemy ORM objects
@@ -16,6 +17,7 @@ class ArticleSchema(BaseModel):
     id: int
     title: str
     content: str
+    created_at: datetime
     sources: list[SourceSchema] = []
 
     class Config:
@@ -26,6 +28,7 @@ class ArticleListSchema(BaseModel):
     id: int
     title: str
     content: str
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -36,8 +39,8 @@ class ChatMessage(BaseModel):
 class SessionCreateRequest(BaseModel):
     """Request to create a new chat session for an article, with context."""
     article_id: int
-    article_title: str | None = None
-    article_content: str | None = None
+    article_title: str
+    article_content: str
     sources: list[dict] = []
 
 class SessionResponse(BaseModel):
@@ -52,4 +55,4 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     """Response from the AI analyst."""
     response: str
-    messages: list[dict]  # Full chat history after response
+    messages: list[dict]
