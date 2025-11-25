@@ -1,9 +1,5 @@
 <template>
-    <div> <!--
-        <h1>Article Detail</h1>
-        <p>Article ID: {{ route.params.id }}</p>
-        <br /> -->
-
+    <div>
         <div>
             <h1 class="article-title text-4xl md:text-5xl font-extrabold text-blue-600">{{ article.title }}</h1>
             <div class="article-content mt-8" v-html="renderedContent"></div>

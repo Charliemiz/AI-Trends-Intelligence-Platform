@@ -6,6 +6,7 @@
         <thead>
           <tr class="bg-gray-100 text-black">
             <th class="border border-gray-400 px-4 py-2 text-left">Title</th>
+            <th class="border border-gray-400 px-4 py-2">Created On</th>
           </tr>
         </thead>
         <tbody>
@@ -16,6 +17,11 @@
                   {{ a.title }}
                 </span>
               </router-link>
+            </td>
+            <td class="border border-gray-400 px-4 py-2">
+                <span>
+                    {{ new Date(a.created_at).toLocaleString() }}
+                </span>
             </td>
           </tr>
         </tbody>
