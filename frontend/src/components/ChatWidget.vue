@@ -22,9 +22,9 @@
     <!-- Chat Box -->
     <div
       v-else-if="isOpen && sessionId"
-      class="bg-white shadow-xl rounded-2xl flex flex-col overflow-hidden border border-gray-200"
+      class="bg-white shadow-xl h-144 rounded-2xl flex flex-col border border-gray-200"
     >
-      <div class="bg-blue-600 text-white p-3 flex justify-between items-center">
+      <div class="bg-blue-600 rounded-2xl text-white p-3 flex justify-between items-center">
         <h3 class="font-semibold">Ask the Analyst</h3>
         <button @click="isOpen = false" class="text-white hover:text-gray-300">✕</button>
       </div>
