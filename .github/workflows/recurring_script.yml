@@ -1,9 +1,9 @@
-name: Run script every hour
+name: Recurring Script
 
 on:
   schedule:
-    # Runs every 1 hours
-    - cron: "0 0 * * *"
+    # Runs every 6 hours
+    - cron: "0 */6 * * *"
   workflow_dispatch:  # allows manual runs from GitHub UI
 
 jobs:

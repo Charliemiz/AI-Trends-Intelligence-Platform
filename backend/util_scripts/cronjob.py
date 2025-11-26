@@ -1,11 +1,9 @@
-from backend.services.perplexity_service import perplexity_search_simple
+from backend.services.perplexity_service import perplexity_search_simple, perplexity_search_trends, perplexity_find_articles, perplexity_summarize
 from backend.services.extract_domain import extract_domain
-from backend.services.topics_config import categorize_sector
+from backend.services.topics_config import categorize_sector, get_enabled_sectors, get_sector_tags
 from backend.db.database import SessionLocal
 from backend.db.crud import create_article_with_sources
 from backend.services.topic_rotation import TopicRotationManager
-from backend.services.topics_config import get_enabled_sectors, get_sector_tags
-from backend.services.perplexity_service import perplexity_search_trends
 import logging
 import os
 
@@ -36,10 +34,12 @@ def main():
         trending_topics = perplexity_search_trends(topic, tags, count=3)
 
         for trend in trending_topics:
+            articles = perplexity_find_articles(trend, count=5)
+            
             query = f"Write an article summarizing and explaining {trend}"
             logger.info(f"Searching for: {query}")
 
-            result = perplexity_search_simple(query)
+            result = perplexity_summarize(query, articles)
             sector = categorize_sector(query)
             # logger.info(f"Query categorized as sector: {sector}")
         
@@ -58,7 +58,7 @@ def main():
             # Create article with sources
             article = create_article_with_sources(
                 db=db,
-                title=result['title'],
+                title=trend,
                 content=result['article'],
                 sources_data=sources_data
             )
