@@ -6,7 +6,7 @@ from backend.db.crud import get_all_articles, get_article_by_id
 from backend.db.schemas import ArticleSchema, ArticleListSchema, ChatMessage, SessionCreateRequest, SessionResponse, ChatRequest, ChatResponse
 from backend.services.openai_service import openai_chat_service
 from backend.services.session_service import (
-    create_session, get_session, add_message_to_session,
+    create_session_with_context, get_session, add_message_to_session,
     get_session_messages, end_session, get_session_article_id
 )
 import logging
@@ -15,6 +15,7 @@ router = APIRouter()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# get routes (webpages)
 
 @router.get("/")
 def read_root():
@@ -42,6 +43,8 @@ def get_article(article_id: int, db: Session = Depends(get_db)):
         logger.error(f"Error in get_article: {e}", exc_info=True)
         raise
 
+# post routes (chat interactions)
+
 @router.post("/chat")
 async def chat_with_analyst(data: ChatMessage):
     return openai_chat_service(data=data)
@@ -50,10 +53,9 @@ async def chat_with_analyst(data: ChatMessage):
 def create_chat_session(request: SessionCreateRequest):
     """Create a new chat session for an article, with context."""
     try:
-        from backend.services.session_service import _create_session_with_context
-        session_id = _create_session_with_context(
+        session_id = create_session_with_context(
             article_id=request.article_id,
-            article_title=getattr(request, "article_title", None),
+            article_title=request.article_title,
             article_content=request.article_content,
             sources=request.sources
         )
