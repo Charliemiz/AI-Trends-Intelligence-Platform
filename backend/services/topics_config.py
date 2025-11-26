@@ -1,7 +1,3 @@
-"""
-Topic/Sector Configuration and Categorization
-"""
-
 # Define all sectors with their search tags/keywords
 SECTOR_CONFIG = {
     "Education": {
@@ -162,16 +158,6 @@ def get_sector_config(sector):
 # ==========================================
 
 def categorize_sector(query: str) -> str:
-    """
-    Categorize a query into a sector by matching keywords.
-    Returns sector name or "General" if no match.
-    
-    Args:
-        query: Search query string
-        
-    Returns:
-        Sector name (e.g., "AI", "Healthcare") or "General"
-    """
     query_lower = query.lower()
     
     # Check each sector's keywords
