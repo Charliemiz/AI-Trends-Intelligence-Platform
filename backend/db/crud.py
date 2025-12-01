@@ -40,7 +40,7 @@ def get_source_by_id(db: Session, source_id: int):
 # -----------------
 # ARTICLE FUNCTIONS
 # -----------------
-def create_article_with_sources(db: Session, title: str, content: str, sources_data: list[dict]):
+def create_article_with_sources(db: Session, title: str, content: str, sources_data: list[dict], tags: list[str] = None):
     article = create_article(db=db, title=title, content=content)
 
     # Get or create all the sources and get their IDs

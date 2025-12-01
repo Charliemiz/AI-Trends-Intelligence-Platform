@@ -12,6 +12,7 @@ from backend.services.session_service import (
 import logging
 from typing import Optional
 from fastapi import Query
+from backend.services.perplexity_service import perplexity_search_simple
 
 router = APIRouter()
 logging.basicConfig(level=logging.INFO)
@@ -132,3 +133,9 @@ def close_chat_session(session_id: str):
     except Exception as e:
         logger.error(f"Error closing session: {e}", exc_info=True)
         raise
+
+@router.get("/perplexity/test")
+def perplexity_test():
+    test_query = "What are the latest trends in artificial intelligence?"
+    result = perplexity_search_simple(test_query)
+    return result
