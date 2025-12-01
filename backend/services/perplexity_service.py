@@ -2,6 +2,8 @@ from dotenv import find_dotenv, load_dotenv
 import requests
 import os, datetime
 from perplexity import *
+from backend.config import settings
+import re
 
 PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
 
@@ -178,8 +180,7 @@ def perplexity_search_rest(query: str, count: int = 5):
     }
 
 def perplexity_search_simple(query: str, count: int = 5):
-    load_dotenv(find_dotenv())
-    api_key = os.getenv("PERPLEXITY_API_KEY")
+    api_key = settings.PERPLEXITY_API_KEY
     if not api_key:
         raise RuntimeError("Missing PERPLEXITY_API_KEY")
 
@@ -214,9 +215,16 @@ def perplexity_search_simple(query: str, count: int = 5):
                     f"- Do NOT use poetic or creative writing language\n"
                     f"- Write like a professional, comprehensive news article\n"
                     f"- Cover different angles and perspectives found in the sources\n\n"
+                    f"TAGS REQUIREMENTS:\n"
+                    f"- Include 5-10 relevant tags\n"
+                    f"- Tags should include: companies mentioned, technologies discussed, key people, industries, concepts, or products\n"
+                    f"- Use proper capitalization for company/product names (e.g., 'OpenAI', 'GPT-4', 'Microsoft')\n"
+                    f"- Keep tags concise (1-3 words each)\n"
+                    f"- Separate tags with commas\n\n"
                     f"Format your response as:\n"
                     f"TITLE: [your title here]\n\n"
                     f"ARTICLE:\n[your article here]"
+                    f"TAGS: [tag1, tag2, tag3, ...]"
                 )
             }
         ]
@@ -227,24 +235,23 @@ def perplexity_search_simple(query: str, count: int = 5):
     data = r.json()
 
     content = data["choices"][0]["message"]["content"]
+
+    # Extract using regex
+    title_match = re.search(r'TITLE:\s*(.+)', content)
+    article_match = re.search(r'ARTICLE:\s*(.+?)(?=TAGS:|$)', content, re.DOTALL)
+    tags_match = re.search(r'TAGS:\s*(.+)', content)
     
-    # Parse title and article from response
-    lines = content.split("\n")
-    title = ""
-    article = ""
-    
-    for i, line in enumerate(lines):
-        if line.startswith("TITLE:"):
-            title = line.replace("TITLE:", "").strip()
-        elif line.startswith("ARTICLE:"):
-            article = "\n".join(lines[i+1:]).strip()
-            break
-    
+    title = title_match.group(1).strip() if title_match else f"Article about {query}"
+    article = article_match.group(1).strip() if article_match else content
+    tags = [tag.strip() for tag in tags_match.group(1).split(",")] if tags_match else []
+
     # Fallback if parsing fails
     if not title:
         title = f"Article about {query}"
     if not article:
         article = content
+    if not tags:
+        tags = []
 
     # Extract sources from search_results
     sources = []
@@ -262,6 +269,7 @@ def perplexity_search_simple(query: str, count: int = 5):
         "article": article,
         "sources": sources,
         "query": query,
+        "tags": tags,
         "created_at": datetime.datetime.now().isoformat()
     }
 
