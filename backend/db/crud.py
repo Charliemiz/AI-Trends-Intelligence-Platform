@@ -65,7 +65,12 @@ def get_article_by_id(db: Session, article_id: int):
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
     return article
 
-def get_all_articles(db: Session):
+def get_all_articles(db: Session, search: str = None):
+    if search:
+        search_pattern = f"%{search}%"
+        return db.query(models.Article).filter(
+            (models.Article.title.ilike(search_pattern))
+        ).all()
     return db.query(models.Article).all()
 
 # -----------------
