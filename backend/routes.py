@@ -10,6 +10,8 @@ from backend.services.session_service import (
     get_session_messages, end_session, get_session_article_id
 )
 import logging
+from typing import Optional
+from fastapi import Query
 
 router = APIRouter()
 logging.basicConfig(level=logging.INFO)
@@ -26,9 +28,17 @@ def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 @router.get("/articles", response_model=list[ArticleListSchema])
-def get_articles(db: Session = Depends(get_db)):
+def get_articles(
+    db: Session = Depends(get_db),
+    search: Optional[str] = Query(None)):
     try:
-        articles = get_all_articles(db)
+        if search:
+            logger.info(f"Searching articles with query: {search}")
+            articles = get_all_articles(db, search=search)
+            logger.info(f"Found {len(articles)} articles matching search query")
+            return articles
+        else:
+            articles = get_all_articles(db)
         logger.info(f"Successfully returned {len(articles)} articles")
         return articles
     except Exception as e:

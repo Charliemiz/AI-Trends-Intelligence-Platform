@@ -11,7 +11,7 @@ ALLOWED_ORIGINS = [
 ]
 
 app = FastAPI()
-app.include_router(router, prefix="/api")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -19,3 +19,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(router, prefix="/api")
