@@ -100,7 +100,7 @@ def get_all_articles(db: Session, search: str = None):
         return db.query(models.Article).filter(
             (models.Article.title.ilike(search_pattern))
         ).all()
-    return db.query(models.Article).all()
+    return db.query(models.Article).order_by(models.Article.created_at.desc()).all()
 
 # -----------------
 # LINK FUNCTIONS
