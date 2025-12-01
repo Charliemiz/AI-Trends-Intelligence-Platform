@@ -2,7 +2,7 @@ from backend.services.perplexity_service import perplexity_search_simple
 from backend.services.extract_domain import extract_domain
 from backend.services.topics_config import categorize_sector
 from backend.db.database import SessionLocal
-from backend.db.crud import create_article_with_sources
+from backend.db.crud import create_article_with_sources_and_tags
 from backend.services.topic_rotation import TopicRotationManager
 from backend.services.topics_config import get_enabled_sectors, get_sector_tags
 from backend.services.perplexity_service import perplexity_search_trends
@@ -56,11 +56,12 @@ def main():
                 })
             
             # Create article with sources
-            article = create_article_with_sources(
+            article = create_article_with_sources_and_tags(
                 db=db,
                 title=result['title'],
                 content=result['article'],
-                sources_data=sources_data
+                sources_data=sources_data,
+                tags=result['tags']
             )
 
             logger.info(f"Successfully added article with ID: {article.id}")

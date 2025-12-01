@@ -12,6 +12,13 @@ class SourceSchema(BaseModel):
     class Config:
         from_attributes = True  # Allow conversion from SQLAlchemy ORM objects
 
+class TagSchema(BaseModel):
+    id: int
+    name: str
+    
+    class Config:
+        from_attributes = True  # Allow conversion from SQLAlchemy ORM objects
+
 class ArticleSchema(BaseModel):
     """Schema for Article objects in responses, including related sources."""
     id: int
@@ -19,6 +26,7 @@ class ArticleSchema(BaseModel):
     content: str
     created_at: datetime
     sources: list[SourceSchema] = []
+    tags:list[TagSchema] = []
 
     class Config:
         from_attributes = True  # Allow conversion from SQLAlchemy ORM objects
