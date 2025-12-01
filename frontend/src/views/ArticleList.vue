@@ -1,12 +1,16 @@
 <template>
   <div class="min-h-screen p-4">
     <h2 class="text-xl font-bold mb-4">Articles</h2>
+    <div class="flex justify-end p-4">
+      <span class="pr-4">Search Articles: </span>
+      <input class="bg-white text-black rounded-lg" v-model="searchQuery" @change="OnSearchChange" ></input>
+    </div>
     <div class="w-full overflow-x-auto">
       <table class="border-collapse border border-gray-400 w-full">
         <thead>
           <tr class="bg-gray-100 text-black">
             <th class="border border-gray-400 px-4 py-2 text-left">Title</th>
-            <th class="border border-gray-400 px-4 py-2">Created On</th>
+            <th class="border border-gray-400 px-4 py-2 w-60">Created On</th>
           </tr>
         </thead>
         <tbody>
@@ -34,6 +38,7 @@
 import { ref, onMounted } from 'vue'
 import { apiRequest } from '@/utils/api'
 const articles = ref([])
+const searchQuery = ref('')
 
 onMounted(async () => {
   const data = await fetchArticles()
@@ -49,6 +54,17 @@ async function fetchArticles() {
     console.error('Failed to fetch articles:', e.message)
     return []
   }
+}
+
+async function OnSearchChange() {
+    try {
+        const response = await apiRequest(`/api/articles?search=${searchQuery.value}`, { method: 'GET' })
+        console.log('Fetched articles:', response)
+        articles.value = response
+    } catch (e) {
+        console.error('Failed to fetch articles:', e.message)
+        articles.value = []
+    }
 }
 
 </script>

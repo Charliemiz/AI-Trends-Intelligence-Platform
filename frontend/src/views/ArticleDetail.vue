@@ -1,17 +1,23 @@
 <template>
-    <div> <!--
-        <h1>Article Detail</h1>
-        <p>Article ID: {{ route.params.id }}</p>
-        <br /> -->
-
+    <div>
         <div>
             <h1 class="article-title text-4xl md:text-5xl font-extrabold text-blue-600">{{ article.title }}</h1>
+            <div class="flex flex-wrap gap-2 mt-4 mb-6">
+            <div v-if="article.tags && article.tags.length > 0" class="flex py-6 flex-wrap gap-2 mt-4 mb-6">
+                <span 
+                    v-for="tag in article.tags" 
+                    :key="tag.id"
+                    class="px-3 py-1 border-2 border-blue-500 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-50 transition-colors">
+                    {{ tag.name }}
+                </span>
+            </div>
+            </div>
             <div class="article-content mt-8" v-html="renderedContent"></div>
             <br/>
             <h2 class="text-2xl font-semibold text-blue-600 mt-8 mb-4">Sources:</h2>
-            <div v-for="s in article.sources" :key="s.id">
-                <a :href="s.url" target="_blank" class="text-blue-600 underline">
-                    {{ s.title }}
+            <div v-for="source in article.sources" :key="source.id">
+                <a :href="source.url" target="_blank" class="text-blue-600 underline">
+                    {{ source.title }}
                 </a>
             </div>
         </div>
