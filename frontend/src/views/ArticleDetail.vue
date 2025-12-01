@@ -7,8 +7,7 @@
                 <span 
                     v-for="tag in article.tags" 
                     :key="tag.id"
-                    class="px-3 py-1 border-2 border-blue-500 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-50 transition-colors"
-                >
+                    class="px-3 py-1 border-2 border-blue-500 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-50 transition-colors">
                     {{ tag.name }}
                 </span>
             </div>
