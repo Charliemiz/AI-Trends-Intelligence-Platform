@@ -1,4 +1,10 @@
-from backend.services.perplexity_service import perplexity_search_simple, perplexity_search_trends, perplexity_find_articles, perplexity_summarize
+import sys
+import os
+
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
+
+from backend.services.perplexity_service import perplexity_search_simple, perplexity_search_trends, perplexity_find_articles, perplexity_summarize, perplexity_impact_score
 from backend.services.source_services import extract_domain, CREDIBLE_SOURCES
 from backend.services.topics_config import categorize_sector, get_enabled_sectors, get_sector_tags
 from backend.db.database import SessionLocal
@@ -78,6 +84,14 @@ def main():
                 )
 
                 logger.info(f"Successfully added article with ID: {article.id}")
+
+                impact_score = perplexity_impact_score(
+                    article_title=trend,
+                    article_content=result['article'],
+                    sector=sector
+                )
+                
+                print(f"Impact Score: {impact_score}")
             
             except Exception as e:
                 logger.error(f"Error on trend '{trend}': {e}, skipping...")

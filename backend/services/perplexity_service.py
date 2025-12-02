@@ -656,3 +656,79 @@ def perplexity_summarize(query: str, articles: list):
         "query": query,
         "created_at": datetime.datetime.now().isoformat()
     }
+
+def perplexity_impact_score(article_title: str, article_content: str, sector: str):
+    load_dotenv(find_dotenv())
+    api_key = os.getenv("PERPLEXITY_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing PERPLEXITY_API_KEY")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "sonar-pro",
+        "temperature": 0.1,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    f"You are an expert analyst evaluating the long-term impact and importance "
+                    f"of AI developments in {sector}. You assess whether news represents "
+                    f"transformational change or incremental updates."
+                )
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Evaluate the IMPACT SCORE (0-10) for this article about AI in {sector}.\n\n"
+                    f"SCORING SCALE:\n"
+                    f"10/10 = Revolutionary change equivalent to industrial/agricultural revolution for {sector}\n"
+                    f"Examples: First autonomous vehicles approved nationwide, AGI breakthrough, \n"
+                    f"AI cures major disease, AI replaces entire job category\n"
+                    f"9/10  = Transformational shift that will reshape the entire sector within 1-2 years\n"
+                    f"8/10  = Major breakthrough that significantly changes industry practices\n"
+                    f"7/10  = Important development with clear widespread adoption path\n"
+                    f"6/10  = Significant progress that will affect many organizations\n"
+                    f"5/10  = Notable advancement with medium-term implications\n"
+                    f"4/10  = Interesting development with limited scope\n"
+                    f"3/10  = Incremental improvement to existing technology\n"
+                    f"2/10  = Minor update or niche application\n"
+                    f"1/10  = Trivial news with no real impact\n"
+                    f"0/10  = No importance, will be forgotten immediately\n\n"
+                    f"EVALUATION CRITERIA:\n"
+                    f"Consider:\n"
+                    f"- Scale of impact (how many people/organizations affected?)\n"
+                    f"- Timeline (immediate vs years away?)\n"
+                    f"- Novelty (truly new or incremental?)\n"
+                    f"- Adoption barriers (easy to implement or major obstacles?)\n"
+                    f"- Permanence (lasting change or temporary trend?)\n"
+                    f"- Competitive advantage (game-changer or table stakes?)\n\n"
+                    f"ARTICLE TO EVALUATE:\n"
+                    f"Title: {article_title}\n\n"
+                    f"Content: {article_content[:3000]}\n\n"
+                    f'WHAT TO RETURN'
+                    f'Integer between 0-10'
+                )
+            }
+        ]
+    }
+
+    r = requests.post(PERPLEXITY_ENDPOINT, json=payload, headers=headers, timeout=60)
+    r.raise_for_status()
+    data = r.json()
+
+    content = data["choices"][0]["message"]["content"]
+    
+    # Extract just the number
+    try:
+        score = int(content)
+    except ValueError:
+        # If there's extra text, extract first number found
+        match = re.search(r'\d+', content)
+        score = int(match.group()) if match else 5
+    
+    # Clamp to 0-10
+    return max(0, min(10, score))
