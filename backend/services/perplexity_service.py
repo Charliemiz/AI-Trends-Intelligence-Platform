@@ -350,11 +350,10 @@ def perplexity_search_trends(sector: str, tags: list, count: int = 3):
         if len(trending_topics) >= count:
             break
     
-    # Fallback if we didn't find enough topics
-    if len(trending_topics) < count:
-        print(f"⚠️  Only found {len(trending_topics)} topics, using fallback")
-        while len(trending_topics) < count:
-            trending_topics.append(f"Recent developments in {sector} - {tags[len(trending_topics) % len(tags)]}")
+    # Return empty list if not enough valid topics found
+    if len(trending_topics) < 2:
+        print(f"⚠️  Only found {len(trending_topics)} AI-related topics for {sector}, returning empty list")
+        return []
     
     return trending_topics[:count]
 
@@ -390,8 +389,7 @@ def perplexity_find_articles(query: str, count: int = 5):
                     f"- No descriptions, no explanations\n"
                     f"- Exactly {count} articles\n\n"
                     f"Example format:\n"
-                    f"Article Title Here | https://example.com/article\n"
-                    f"Another Article | https://example.com/another"
+                    f"https://example.com/article1, https://example.com/article2, https://example.com/article3"
                 )
             }
         ]
@@ -414,20 +412,20 @@ def perplexity_find_articles(query: str, count: int = 5):
     # Fallback: parse from content if search_results is empty
     if not articles:
         content = data["choices"][0]["message"]["content"]
-        lines = content.split("\n")
         
-        for line in lines[:count * 2]: 
-            if "|" in line and "http" in line:
-                parts = line.split("|", 1)
-                if len(parts) == 2:
-                    title = parts[0].strip().lstrip("0123456789.-•* ")
-                    url = parts[1].strip()
-                    
-                    if title and url.startswith("http"):
-                        articles.append({
-                            "title": title,
-                            "url": url
-                        })
+        # Split by commas to get individual URLs
+        urls = [url.strip() for url in content.split(",")]
+        
+        for url in urls[:count]:
+            url = url.strip()
+            # Clean up any line breaks or extra characters
+            url = url.split()[0] if url else ""
+            
+            if url.startswith("http"):
+                articles.append({
+                    "title": "",  
+                    "url": url
+                })
             
             if len(articles) >= count:
                 break
@@ -445,104 +443,153 @@ def perplexity_summarize(query: str, articles: list):
         "Content-Type": "application/json"
     }
 
-    # Extract URLs from articles and format for the prompt
-    article_urls = [article["url"] for article in articles]
-    urls_list = "\n".join([f"- {url}" for url in article_urls])
-
+    # Step 1: Fetch full content from each article URL using sonar-pro
+    print(f"Fetching content from {len(articles)} articles...")
+    articles_with_content = []
+    
+    for i, article in enumerate(articles):
+        url = article.get("url", "")
+        if not url:
+            continue
+            
+        fetch_payload = {
+            "model": "sonar-pro",
+            "temperature": 0.1,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": f"Read and extract the full text content from this article: {url}\n\nProvide the complete article text with all key information, statistics, quotes, and details."
+                }
+            ]
+        }
+        
+        try:
+            r_fetch = requests.post(PERPLEXITY_ENDPOINT, json=fetch_payload, headers=headers, timeout=45)
+            r_fetch.raise_for_status()
+            fetch_data = r_fetch.json()
+            
+            full_content = fetch_data["choices"][0]["message"]["content"]
+            articles_with_content.append({
+                "url": url,
+                "title": article.get("title", ""),
+                "content": full_content,
+                "index": i + 1
+            })
+            print(f"  ✓ Fetched content from article {i+1}/{len(articles)}")
+        except Exception as e:
+            print(f"  ✗ Failed to fetch article {i+1}: {e}")
+            # Add with empty content so we can still track it
+            articles_with_content.append({
+                "url": url,
+                "title": article.get("title", ""),
+                "content": "",
+                "index": i + 1
+            })
+    
+    if not articles_with_content:
+        raise RuntimeError("Failed to fetch any article content")
+    
+    # Step 2: Prepare the context with all fetched articles
+    articles_sections = []
+    for article in articles_with_content:
+        if article['content']:
+            articles_sections.append(
+                f"SOURCE [{article['index']}]:\n"
+                f"Title: {article['title']}\n"
+                f"URL: {article['url']}\n\n"
+                f"Content:\n{article['content']}"
+            )
+    
+    articles_text = "\n\n" + "="*80 + "\n\n"
+    articles_text += ("\n\n" + "="*80 + "\n\n").join(articles_sections)
+    
+    # Check if content is too long
+    max_chars = 100000  # Conservative limit
+    if len(articles_text) > max_chars:
+        print(f"  ⚠ Content too long ({len(articles_text)} chars), truncating...")
+        articles_text = articles_text[:max_chars] + "\n\n[Content truncated due to length]"
+    
+    # Step 3: Use sonar model with explicit instructions to NOT search
+    
     payload = {
-        "model": "sonar-pro",
+        "model": "sonar",  
         "temperature": 0.1,
         "messages": [
             {
                 "role": "system",
                 "content": (
-                    f"You must read and use ONLY these specific URLs as sources:\n\n{urls_list}\n\n"
-                    f"Do NOT search for other sources. Use ONLY the information from these {len(article_urls)} URLs."
+                    f"You are a professional research journalist. "
+                    f"You have been provided with the complete content from {len(articles_with_content)} specific articles below. "
+                    f"You must write ONLY using information from these provided articles. "
+                    f"Do NOT search for additional sources. Do NOT add any external knowledge."
                 )
             },
             {
                 "role": "user",
                 "content": (
-                    f"You are a professional research journalist writing an evidence-based article.\n\n"
+                    f"Write a comprehensive article about: {query}\n\n"
                     
-                    f"TASK: Write a comprehensive article synthesizing information from ALL {len(article_urls)} URLs about: {query}\n\n"
-                    
-                    f"MANDATORY SOURCE USAGE:\n"
-                    f"- You MUST use information from ALL {len(article_urls)} sources provided\n"
-                    f"- Each source must be cited at least once in the article\n"
-                    f"- If a source seems less relevant, find at least one piece of information from it to include\n\n"
-                    
-                    f"CRITICAL CITATION RULES:\n"
-                    f"- After EVERY factual claim, statistic, or statement, immediately cite the source number in brackets\n"
+                    f"CRITICAL RULES:\n"
+                    f"- Use ONLY information from the articles provided below\n"
+                    f"- Each article is marked with [SOURCE X] - cite using [X]\n"
+                    f"- After EVERY factual claim, immediately cite the source number in brackets\n"
                     f"- Format: 'The market grew to $2.79 billion[1]' NOT 'The market grew to $2.79 billion. [1]'\n"
-                    f"- NEVER bundle citations like [1][2][3] unless both sources say the EXACT same thing\n"
-                    f"- If sources say different things, separate them: 'Study A found X[1], while study B found Y[2]'\n"
-                    f"- If sources say similar things, be specific: 'Both studies found X, with source [1] emphasizing Y and source [2] noting Z'\n"
-                    f"- Each sentence may have MULTIPLE separate citations if drawing from multiple sources\n"
-                    f"- Example: 'Sora can generate 60-second videos[1], while Runway offers 4K upscaling[2] and lower costs[3]'\n\n"
+                    f"- NEVER bundle citations like [1][2][3] unless sources say the EXACT same thing\n"
+                    f"- Do NOT add information not in the provided articles\n"
+                    f"- Do NOT use your general knowledge\n\n"
+                    f"- Synthesize information from MULTIPLE sources effectively\n"
+                    f"- Include specific details, quotes, statistics, and examples from the sources\n"
+                    f"- Act as a NEUTRAL party\n"
+                    f"- Do NOT use poetic or creative writing language\n"
+                    f"- Write like a professional, comprehensive news article\n"
+                    f"- Cover different angles and perspectives found in the sources\n\n"
                     
-                    f"FORBIDDEN - DO NOT DO THESE THINGS:\n"
-                    f"- Writing ANY sentence without a citation if it contains factual claims\n"
-                    f"- Bundling citations [1][2][3] without explaining what each source contributes\n"
-                    f"- Starting paragraphs with uncited context-setting or framing\n"
-                    f"- Adding transitional sentences like 'Research shows...' or 'The impact is complex...' without citations\n"
-                    f"- Using interpretive language like 'This challenges...', 'This reveals...', 'This underscores...' unless sources explicitly use those words\n"
-                    f"- Making claims about what sources are doing ('challenging narratives', 'revealing insights') unless sources say that\n"
-                    f"- Adding ANY information, context, or framing not explicitly in the provided sources\n\n"
-                    
-                    f"CONTENT RESTRICTIONS:\n"
-                    f"- Use ONLY information explicitly stated in the {len(article_urls)} provided URLs\n"
-                    f"- Do NOT add external knowledge, assumptions, or general context not in the sources\n"
-                    f"- Do NOT editorialize or add your own interpretations\n"
-                    f"- Every factual statement must be traceable to a specific source\n"
-                    f"- If you need to write a transition, either cite it or make it purely structural (not factual)\n"
-                    f"- Structural transitions OK: 'The next section examines...', 'Three findings emerged...'\n"
-                    f"- Factual transitions MUST BE CITED: 'The environmental impact varies by region[2]'\n\n"
-                    
-                    f"WHAT TO INCLUDE:\n"
-                    f"- Direct quotes from sources (use quotation marks + citation)\n"
-                    f"- Specific statistics, numbers, and data points with citations\n"
-                    f"- Concrete examples, case studies, or real-world applications mentioned in sources\n"
-                    f"- Named individuals, companies, or organizations mentioned\n"
-                    f"- Dates, timeframes, and specific events\n"
-                    f"- Technical details and methodologies if described in sources\n\n"
-                    
-                    f"STRUCTURE REQUIREMENTS:\n"
+                    f"STRUCTURE:\n"
                     f"- Write 800-1200 words\n"
-                    f"- Use clear section headers (2-4 sections)\n"
-                    f"- Lead with the most important/recent information\n"
-                    f"- Each paragraph should focus on one main idea\n"
-                    f"- Maintain neutral, journalistic tone - report what sources say, don't interpret\n\n"
+                    f"- Use 2-4 clear section headers\n"
+                    f"- Maintain neutral, journalistic tone\n\n"
                     
-                    f"OUTPUT FORMAT:\n"
-                    f"[Create a specific, title that reflects the actual content, must be compeling]\n\n"
-                    f"[Your article text with inline citations]\n\n"
+                    f"TAGS REQUIREMENTS:\n"
+                    f"- Include 5-10 relevant tags\n"
+                    f"- Tags should include: companies mentioned, technologies discussed, key people, industries, concepts, or products\n"
+                    f"- Use proper capitalization for company/product names (e.g., 'OpenAI', 'GPT-4', 'Microsoft')\n"
+                    f"- Keep tags concise (1-3 words each)\n"
+                    f"- Separate tags with commas\n\n"
+
+                    f"FORMAT:\n"
+                    f"[Title]\n\n"
+                    f"[Article with citations]\n\n"
+                    f"TAGS: [tag1, tag2, tag3, ...]\n\n"
                     
-                    f"QUALITY CHECKS BEFORE SUBMITTING:\n"
-                    f"1. Does every factual claim have a citation immediately after it?\n"
-                    f"2. Did I avoid bundling citations [1][2][3] and instead specify what each source contributes?\n"
-                    f"3. Did I use ALL {len(article_urls)} sources and cite each at least once?\n"
-                    f"4. Are ALL transitions either cited or purely structural (not factual)?\n"
-                    f"5. Did I avoid adding ANY interpretation, context, or framing not in sources?\n"
-                    f"6. Did I include specific quotes, numbers, and examples from sources?\n"
-                    f"7. Is the tone neutral - reporting what sources say, not what they 'reveal' or 'challenge'?\n"
-                    f"8. Can every sentence be traced back to a specific source?\n\n"
-                    
+                    f"ARTICLES:\n"
+                    f"{articles_text}"
                 )
             }
         ]
     }
 
-    r = requests.post(PERPLEXITY_ENDPOINT, json=payload, headers=headers, timeout=60)
+    r = requests.post(PERPLEXITY_ENDPOINT, json=payload, headers=headers, timeout=90)
     r.raise_for_status()
     data = r.json()
 
     content = data["choices"][0]["message"]["content"]
     
-    # Parse title and article from response
-    lines = content.split("\n")
-    title = ""
+    # Parse title, article, and tags from response
+    tags = []
+    
+    # Split content to extract tags
+    if "TAGS:" in content:
+        main_content, tags_part = content.split("TAGS:", 1)
+        tags = [tag.strip() for tag in tags_part.split(",") if tag.strip()]
+    else:
+        main_content = content
+    
+    lines = main_content.split("\n")  
+    title = ""                         
     article_text = ""
+
+    for i, line in enumerate(lines): 
+        article_text = ""
     
     for i, line in enumerate(lines):
         if line.startswith("##"):
@@ -560,21 +607,22 @@ def perplexity_summarize(query: str, articles: list):
     if not title:
         title = f"Article about {query}"
     if not article_text:
-        article_text = content
+        article_text = main_content
 
-    # Use the articles we passed in (not search_results from Perplexity)
+    # Return the original articles as sources
     sources = []
-    for src in articles:
+    for article in articles:
         sources.append({
-            "title": src.get("title", ""),
-            "url": src.get("url", ""),
-            "source": src.get("url", "").split("/")[2] if src.get("url") else ""
+            "title": article.get("title", ""),
+            "url": article.get("url", ""),
+            "source": article.get("url", "").split("/")[2] if article.get("url") else ""
         })
 
     return {
         "title": title,
         "article": article_text,
         "sources": sources,
+        "tags": tags,
         "query": query,
         "created_at": datetime.datetime.now().isoformat()
     }

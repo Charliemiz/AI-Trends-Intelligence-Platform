@@ -33,6 +33,11 @@ def main():
         # Find trending topics
         trending_topics = perplexity_search_trends(topic, tags, count=3)
 
+        if not trending_topics or len(trending_topics) < 2:
+            logger.warning(f"⚠️  Not enough valid AI-related topics found for {topic} ({len(trending_topics) if trending_topics else 0}/3)")
+            logger.warning(f"Skipping to next sector. Sector already advanced in rotation.")
+            return
+
         for trend in trending_topics:
             articles = perplexity_find_articles(trend, count=5)
             
