@@ -1,5 +1,5 @@
 from backend.services.perplexity_service import perplexity_search_simple, perplexity_search_trends, perplexity_find_articles, perplexity_summarize
-from backend.services.extract_domain import extract_domain
+from backend.services.source_services import extract_domain, CREDIBLE_SOURCES
 from backend.services.topics_config import categorize_sector, get_enabled_sectors, get_sector_tags
 from backend.db.database import SessionLocal
 from backend.db.crud import create_article_with_sources_and_tags
@@ -39,37 +39,49 @@ def main():
             return
 
         for trend in trending_topics:
-            articles = perplexity_find_articles(trend, count=5)
-            
-            query = f"Write an article summarizing and explaining {trend}"
-            logger.info(f"Searching for: {query}")
-
-            result = perplexity_summarize(query, articles)
-            sector = categorize_sector(query)
-            # logger.info(f"Query categorized as sector: {sector}")
-        
-            sources_data = []
-            for source in result['sources']:
-                source_name = source.get("title") 
-                source_url = source["url"]
+            try:
+                articles = perplexity_find_articles(trend, count=20, credible_sources=CREDIBLE_SOURCES)
                 
-                sources_data.append({
-                    "title": source_name,
-                    "url": source_url,
-                    "domain": extract_domain(source_url),
-                    "sector": sector  # All sources from this query get the same sector
-                })
-            
-            # Create article with sources
-            article = create_article_with_sources_and_tags(
-                db=db,
-                title=trend,
-                content=result['article'],
-                sources_data=sources_data,
-                tags=result['tags']
-            )
+                # Filter to trusted only
+                trusted_articles = [a for a in articles if a.get("trusted", False)]
+                
+                # Skip if no trusted sources
+                if not trusted_articles:
+                    logger.warning(f"No trusted sources for: {trend}, skipping...")
+                    continue
 
-            logger.info(f"Successfully added article with ID: {article.id}")
+                query = f"Write an article summarizing and explaining {trend}"
+                logger.info(f"Searching for: {query}")
+
+                result = perplexity_summarize(query, trusted_articles)
+                sector = categorize_sector(query)
+            
+                sources_data = []
+                for source in result['sources']:
+                    source_name = source.get("title") 
+                    source_url = source["url"]
+                    
+                    sources_data.append({
+                        "title": source_name,
+                        "url": source_url,
+                        "domain": extract_domain(source_url),
+                        "sector": sector
+                    })
+                
+                # Create article with sources
+                article = create_article_with_sources_and_tags(
+                    db=db,
+                    title=trend,
+                    content=result['article'],
+                    sources_data=sources_data,
+                    tags=result['tags']
+                )
+
+                logger.info(f"Successfully added article with ID: {article.id}")
+            
+            except Exception as e:
+                logger.error(f"Error on trend '{trend}': {e}, skipping...")
+                continue
         
     except Exception as e:
         logger.error(f"Cron job failed: {e}")

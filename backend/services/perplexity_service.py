@@ -357,7 +357,9 @@ def perplexity_search_trends(sector: str, tags: list, count: int = 3):
     
     return trending_topics[:count]
 
-def perplexity_find_articles(query: str, count: int = 5):
+def perplexity_find_articles(query: str, count: int = 5, credible_sources=None):
+    from backend.services.source_services import extract_domain
+    
     load_dotenv(find_dotenv())
     api_key = os.getenv("PERPLEXITY_API_KEY")
     if not api_key:
@@ -403,15 +405,31 @@ def perplexity_find_articles(query: str, count: int = 5):
     articles = []
     search_results = data.get("search_results", [])
     
+    #temporary prints
+    print(f"\n{'='*80}")
+    print(f"{query[:60]}...")
+    print(f"  Requested: {count} articles")
+    print(f"  search_results returned: {len(search_results)} results")
+    
     for result in search_results[:count]:
+        url = result.get("url", "")
+        domain = extract_domain(url) if url else ""
+        is_trusted = domain in credible_sources if credible_sources else False
+        
         articles.append({
             "title": result.get("title", ""),
-            "url": result.get("url", "")
+            "url": url,
+            "domain": domain,
+            "trusted": is_trusted
         })
+    
+    print(f"  Articles from search_results: {len(articles)}")
     
     # Fallback: parse from content if search_results is empty
     if not articles:
+        print(f"  search_results was empty, trying content parsing...")
         content = data["choices"][0]["message"]["content"]
+        print(f"  Content length: {len(content)} chars")
         
         # Split by commas to get individual URLs
         urls = [url.strip() for url in content.split(",")]
@@ -422,13 +440,25 @@ def perplexity_find_articles(query: str, count: int = 5):
             url = url.split()[0] if url else ""
             
             if url.startswith("http"):
+                domain = extract_domain(url)
+                is_trusted = domain in credible_sources if credible_sources else False               
                 articles.append({
                     "title": "",  
-                    "url": url
+                    "url": url,
+                    "domain": domain,
+                    "trusted": is_trusted
                 })
             
             if len(articles) >= count:
                 break
+        
+        print(f"  Articles from content parsing: {len(articles)}")
+    
+    # Summary of trusted vs uncertain
+    trusted_count = sum(1 for a in articles if a.get("trusted", False))
+    print(f"  Trusted sources: {trusted_count}/{len(articles)}")
+    print(f"  TOTAL articles returned: {len(articles)}")
+    print('='*80 + "\n")
     
     return articles[:count]
 
