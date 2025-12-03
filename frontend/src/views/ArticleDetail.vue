@@ -12,7 +12,7 @@
                 </span>
             </div>
             </div>
-            <div class="article-content mt-8" v-html="renderedContent"></div>
+            <div class="article-content mt-8" v-html="article.content"></div>
             <br/>
             <h2 class="text-2xl font-semibold text-blue-600 mt-8 mb-4">Sources:</h2>
             <div v-for="source in article.sources" :key="source.id">
@@ -48,49 +48,5 @@ async function fetchArticleById(id) {
         return {}
     }
 }
-
-function escapeHtml(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-}
-
-const renderedContent = computed(() => {
-    const text = article.value?.content || ''
-    if (!text) return ''
-
-    const lines = text.split(/\r?\n/)
-    const out = []
-    let paragraphBuffer = []
-
-    const flushParagraph = () => {
-        if (paragraphBuffer.length) {
-            out.push(`<p class="mb-3 text-base leading-7">${paragraphBuffer.join(' ')}</p>`)
-            paragraphBuffer = []
-        }
-    }
-
-    for (let rawLine of lines) {
-        const line = rawLine.trim()
-        if (line === '') {
-            flushParagraph()
-            continue
-        }
-
-        const headerMatch = line.match(/^\*\*(.+?)\*\*$/)
-        if (headerMatch) {
-            flushParagraph()
-            out.push(`<h2 class="text-2xl font-semibold text-blue-600 mt-8 mb-4">${escapeHtml(headerMatch[1])}</h2>`)
-        } else {
-            paragraphBuffer.push(escapeHtml(line))
-        }
-    }
-
-    flushParagraph()
-    return out.join('\n')
-})
 
 </script>
