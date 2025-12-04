@@ -1,10 +1,4 @@
-from pathlib import Path
 from urllib.parse import urlparse
-from backend.db.database import SessionLocal
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 def extract_domain(url: str) -> str:
     try:

@@ -23,6 +23,7 @@ class Article(Base):
     title = Column(String)
     content = Column(Text)
     created_at = Column(TIMESTAMP, server_default="CURRENT_TIMESTAMP", nullable=False)
+    impact_score = Column(Integer, default=-1)
     
     # Relationship to sources through the junction table
     sources = relationship('Source', secondary=source_articles, back_populates='articles')
