@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-y-auto">
-    <div class="max-w-4xl mx-auto px-8 py-8">
+    <div class="max-w-6xl mx-auto px-8 py-8">
       <!-- Back Button -->
       <router-link to="/articles" class="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 mb-8 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
