@@ -65,8 +65,8 @@ def get_or_create_tags_bulk(db: Session, tag_names: list[str]):
 # -----------------
 # ARTICLE FUNCTIONS
 # -----------------
-def create_article_with_sources_and_tags(db: Session, title: str, content: str, sources: list[dict], tags: list[str] = None):
-    article = create_article(db=db, title=title, content=content)
+def create_article_with_sources_and_tags(db: Session, title: str, content: str, sources: list[dict], tags: list[str] = None, impact_score: int = -1):
+    article = create_article(db=db, title=title, content=content, impact_score=impact_score)
 
     # Get or create all the sources and get their IDs
     # This step will eliminate duplicates added to the db
@@ -83,8 +83,8 @@ def create_article_with_sources_and_tags(db: Session, title: str, content: str, 
 
     return article
 
-def create_article(db: Session, title: str, content: str):
-    article = models.Article(title=title, content=content)
+def create_article(db: Session, title: str, content: str, impact_score: int = -1):
+    article = models.Article(title=title, content=content,impact_score=impact_score)
     db.add(article)
     db.commit()
     db.refresh(article)
