@@ -54,13 +54,19 @@ def main():
 
                 result = perplexity_summarize(query, trusted_articles)
                 sector = categorize_sector(query)
+
+                impact_score = perplexity_impact_score(
+                    article_title=trend,
+                    article_content=result['article'],
+                    sector=sector
+                )
             
-                sources_data = []
+                sources = []
                 for source in result['sources']:
                     source_name = source.get("title") 
                     source_url = source["url"]
                     
-                    sources_data.append({
+                    sources.append({
                         "title": source_name,
                         "url": source_url,
                         "domain": extract_domain(source_url),
@@ -72,19 +78,12 @@ def main():
                     db=db,
                     title=trend,
                     content=result['article'],
-                    sources_data=sources_data,
-                    tags=result['tags']
+                    sources=sources,
+                    tags=result['tags'],
+                    impact_score=impact_score
                 )
 
                 logger.info(f"Successfully added article with ID: {article.id}")
-
-                impact_score = perplexity_impact_score(
-                    article_title=trend,
-                    article_content=result['article'],
-                    sector=sector
-                )
-                
-                print(f"Impact Score: {impact_score}")
             
             except Exception as e:
                 logger.error(f"Error on trend '{trend}': {e}, skipping...")
