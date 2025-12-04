@@ -25,10 +25,7 @@ class Article(Base):
     created_at = Column(TIMESTAMP, server_default="CURRENT_TIMESTAMP", nullable=False)
     impact_score = Column(Integer, default=-1)
     
-    # Relationship to sources through the junction table
     sources = relationship('Source', secondary=source_articles, back_populates='articles')
-
-    # Relatinship to tags (many-to-many)
     tags = relationship('Tag', secondary='article_tags', back_populates='articles')
 
 class Source(Base):
@@ -40,7 +37,6 @@ class Source(Base):
     domain = Column(String)  
     sector = Column(String)  
     
-    # Relationship to articles through the junction table
     articles = relationship('Article', secondary=source_articles, back_populates='sources')
 
 class Tag(Base):
@@ -49,5 +45,4 @@ class Tag(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
-    # Relationship to articles through the junction table
     articles = relationship('Article', secondary='article_tags', back_populates='tags')

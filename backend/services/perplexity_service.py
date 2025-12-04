@@ -106,7 +106,7 @@ def perplexity_search_simple(query: str, count: int = 5):
     }
 
 #Find trends
-def perplexity_search_trends(sector: str, tags: list, count: int = 3):
+def perplexity_search_trends(sector: str | None, tags: list, count: int = 3):
     load_dotenv(find_dotenv())
     api_key = os.getenv("PERPLEXITY_API_KEY")
     if not api_key:

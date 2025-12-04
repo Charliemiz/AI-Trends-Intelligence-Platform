@@ -69,11 +69,4 @@ async function OnSearchChange() {
 
 </script>
 
-<style scoped>
-.about {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-</style>
+<!-- removed unused scoped styles -->
