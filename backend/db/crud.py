@@ -106,7 +106,7 @@ def update_article_impact_score(db: Session, article_id: int, impact_score: int)
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
     if not article:
         return None
-    article.impact_score = impact_score
+    article.impact_score = cast(int, impact_score)
     db.commit()
     db.refresh(article)
     return article
