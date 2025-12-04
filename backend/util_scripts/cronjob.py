@@ -1,8 +1,14 @@
+import sys
+import os
+
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
+
 from backend.services.perplexity_service import perplexity_search_trends, perplexity_find_articles, perplexity_summarize, perplexity_impact_score
 from backend.services.source_services import extract_domain, CREDIBLE_SOURCES
 from backend.db.database import SessionLocal
 from backend.db.crud import create_article_with_sources_and_tags
-from backend.services.topic_rotation import TopicRotationManager,categorize_sector, get_enabled_sectors, get_sector_tags
+from backend.services.sector_service import SectorRotationManager, get_enabled_sectors, get_sector_tags
 import logging
 import os
 
@@ -14,26 +20,26 @@ def main():
     db = SessionLocal()
 
     try:
-        #topic_rotation_state.json location, (current topic state management)
-        state_file = os.path.join(os.path.dirname(__file__), "topic_rotation_state.json")
+        #sector_rotation_state.json location, (current sector state management)
+        state_file = os.path.join(os.path.dirname(__file__), "sector_rotation_state.json")
         
         # Get enabled sectors
         enabled_sectors = get_enabled_sectors()
         
         # Create rotation manager
-        manager = TopicRotationManager(str(state_file))
-        manager.initialize_topics(enabled_sectors)
+        manager = SectorRotationManager(str(state_file))
+        manager.initialize_sectors(enabled_sectors)
 
-        #Get current topic in rotation
-        topic = manager.get_next_topic()
+        #Get current sector in rotation
+        sector = manager.get_next_sectors()
         #Get tags
-        tags = get_sector_tags(topic)
+        tags = get_sector_tags(sector)
 
         # Find trending topics
-        trending_topics = perplexity_search_trends(topic, tags, count=3)
+        trending_topics = perplexity_search_trends(sector, tags, count=3)
 
         if not trending_topics or len(trending_topics) < 2:
-            logger.warning(f"⚠️  Not enough valid AI-related topics found for {topic} ({len(trending_topics) if trending_topics else 0}/3)")
+            logger.warning(f"⚠️  Not enough valid AI-related topics found for {sector} ({len(trending_topics) if trending_topics else 0}/3)")
             logger.warning(f"Skipping to next sector. Sector already advanced in rotation.")
             return
 
@@ -53,7 +59,7 @@ def main():
                 logger.info(f"Searching for: {query}")
 
                 result = perplexity_summarize(query, trusted_articles)
-                sector = categorize_sector(query)
+                
 
                 impact_score = perplexity_impact_score(
                     article_title=trend,

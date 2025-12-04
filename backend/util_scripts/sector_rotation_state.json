@@ -1,6 +1,6 @@
 {
-  "current_index": 1,
-  "topics_queue": [
+  "current_index": 0,
+  "sectors_queue": [
     "Education",
     "Healthcare",
     "Finance",
@@ -21,6 +21,6 @@
     "Security",
     "Telecommunications"
   ],
-  "last_run": "2025-12-01T16:02:44.319528",
-  "cycle_count": 0
+  "last_run": "2025-12-04T12:44:46.986414",
+  "cycle_count": 2
 }

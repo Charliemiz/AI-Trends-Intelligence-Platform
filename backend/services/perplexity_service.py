@@ -10,7 +10,7 @@ PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
 # New function using the official Perplexity SDK
 # We may need to make a new api key for this
 
-#only referenced in routes.py perplexity_test()
+# Only referenced in routes.py perplexity_test()
 def perplexity_search_simple(query: str, count: int = 5):
     api_key = settings.PERPLEXITY_API_KEY
     if not api_key:
@@ -105,7 +105,7 @@ def perplexity_search_simple(query: str, count: int = 5):
         "created_at": datetime.datetime.now().isoformat()
     }
 
-#Find trends
+# Find trends
 def perplexity_search_trends(sector: str, tags: list, count: int = 3):
     load_dotenv(find_dotenv())
     api_key = os.getenv("PERPLEXITY_API_KEY")
@@ -189,7 +189,7 @@ def perplexity_search_trends(sector: str, tags: list, count: int = 3):
     
     return trending_topics[:count]
 
-#Find articles
+# Find articles
 def perplexity_find_articles(query: str, count: int = 5, credible_sources=None):
     from backend.services.source_services import extract_domain
     
@@ -295,7 +295,7 @@ def perplexity_find_articles(query: str, count: int = 5, credible_sources=None):
     
     return articles[:count]
 
-    #Writes a summary about our trends using source articles we recieved
+    # Writes a summary about our trends using source articles we recieved
 def perplexity_summarize(query: str, articles: list):
     load_dotenv(find_dotenv())
     api_key = os.getenv("PERPLEXITY_API_KEY")
@@ -491,7 +491,7 @@ def perplexity_summarize(query: str, articles: list):
         "created_at": datetime.datetime.now().isoformat()
     }
 
-    #Returns an impact score for our end article 
+    # Returns an impact score for our end article 
 def perplexity_impact_score(article_title: str, article_content: str, sector: str):
     load_dotenv(find_dotenv())
     api_key = os.getenv("PERPLEXITY_API_KEY")
