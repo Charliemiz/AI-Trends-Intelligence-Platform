@@ -7,12 +7,12 @@ from backend.db import models
 # -----------------
 # SOURCE FUNCTIONS
 # -----------------
-def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
+def get_or_create_sources_bulk(db: Session, sources: list[dict]):
     """
     Take in a list of dictionaries with 'title' and 'url' keys,
     return a list of Source objects, creating any that don't already exist.
     """
-    urls = [s["url"] for s in sources_data]
+    urls = [s["url"] for s in sources]
 
     # Query for sources that already exist
     existing_sources = db.query(models.Source).filter(models.Source.url.in_(urls)).all()
@@ -20,7 +20,7 @@ def get_or_create_sources_bulk(db: Session, sources_data: list[dict]):
 
     sourceIds = []
         
-    for source in sources_data:
+    for source in sources:
         if source["url"] in existing_urls:
             sourceIds.append(existing_urls[source["url"]])
         else:
@@ -65,12 +65,12 @@ def get_or_create_tags_bulk(db: Session, tag_names: list[str]):
 # -----------------
 # ARTICLE FUNCTIONS
 # -----------------
-def create_article_with_sources_and_tags(db: Session, title: str, content: str, sources_data: list[dict], tags: list[str] = None):
+def create_article_with_sources_and_tags(db: Session, title: str, content: str, sources: list[dict], tags: list[str] = None):
     article = create_article(db=db, title=title, content=content)
 
     # Get or create all the sources and get their IDs
     # This step will eliminate duplicates added to the db
-    sourcesIds = get_or_create_sources_bulk(db=db, sources_data=sources_data)
+    sourcesIds = get_or_create_sources_bulk(db=db, sources=sources)
     tagIds = get_or_create_tags_bulk(db=db, tag_names=tags) if tags else []
 
     # Link sources to the article
@@ -84,11 +84,11 @@ def create_article_with_sources_and_tags(db: Session, title: str, content: str, 
     return article
 
 def create_article(db: Session, title: str, content: str):
-    art = models.Article(title=title, content=content)
-    db.add(art)
+    article = models.Article(title=title, content=content)
+    db.add(article)
     db.commit()
-    db.refresh(art)
-    return art
+    db.refresh(article)
+    return article
 
 def get_article_by_id(db: Session, article_id: int): 
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
@@ -101,6 +101,15 @@ def get_all_articles(db: Session, search: str = None):
             (models.Article.title.ilike(search_pattern))
         ).all()
     return db.query(models.Article).order_by(models.Article.created_at.desc()).all()
+
+def update_article_impact_score(db: Session, article_id: int, impact_score: int):
+    article = db.query(models.Article).filter(models.Article.id == article_id).first()
+    if not article:
+        return None
+    article.impact_score = impact_score
+    db.commit()
+    db.refresh(article)
+    return article
 
 # -----------------
 # LINK FUNCTIONS

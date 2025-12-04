@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+# Database-related Schemas #####################################################
+
 class SourceSchema(BaseModel):
     """Schema for Source objects in responses."""
     id: int
@@ -10,14 +12,14 @@ class SourceSchema(BaseModel):
     sector: str
 
     class Config:
-        from_attributes = True  # Allow conversion from SQLAlchemy ORM objects
+        from_attributes = True
 
 class TagSchema(BaseModel):
     id: int
     name: str
     
     class Config:
-        from_attributes = True  # Allow conversion from SQLAlchemy ORM objects
+        from_attributes = True
 
 class ArticleSchema(BaseModel):
     """Schema for Article objects in responses, including related sources."""
@@ -26,10 +28,11 @@ class ArticleSchema(BaseModel):
     content: str
     created_at: datetime
     sources: list[SourceSchema] = []
-    tags:list[TagSchema] = []
+    tags: list[TagSchema] = []
+    impact_score: int
 
     class Config:
-        from_attributes = True  # Allow conversion from SQLAlchemy ORM objects
+        from_attributes = True
 
 class ArticleListSchema(BaseModel):
     """Schema for a list of articles (without detailed sources)."""
@@ -40,6 +43,8 @@ class ArticleListSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+# Chat-related Schemas #########################################################
 
 class ChatMessage(BaseModel):
     message: str
