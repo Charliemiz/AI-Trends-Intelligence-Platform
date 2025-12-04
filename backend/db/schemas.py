@@ -36,9 +36,19 @@ class ArticleListSchema(BaseModel):
     title: str
     content: str
     created_at: datetime
+    impact_score: int | None = None
+    tags: list[TagSchema] = []
 
     class Config:
         from_attributes = True
+
+class PaginatedArticlesResponse(BaseModel):
+    """Response containing paginated articles with total count."""
+    items: list[ArticleListSchema]
+    total_count: int
+    page: int
+    page_size: int
+    total_pages: int
 
 class ChatMessage(BaseModel):
     message: str

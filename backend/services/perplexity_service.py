@@ -492,7 +492,7 @@ def perplexity_summarize(query: str, articles: list):
     }
 
     # Returns an impact score for our end article 
-def perplexity_impact_score(article_title: str, article_content: str, sector: str):
+def perplexity_impact_score(article_title: str, article_content: str, sector: str | None):
     load_dotenv(find_dotenv())
     api_key = os.getenv("PERPLEXITY_API_KEY")
     if not api_key:

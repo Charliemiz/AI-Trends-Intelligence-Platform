@@ -73,10 +73,23 @@ def get_article_by_id(db: Session, article_id: int):
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
     return article
 
-def get_all_articles(db: Session, search: str | None = None):
+def get_all_articles(db: Session, search: str | None = None, limit: int = 20, offset: int = 0):
+    """
+    Get paginated articles, optionally filtered by search query.
+    Returns a tuple of (articles, total_count)
+    """
+    query = db.query(models.Article)
+    
     if search:
-        return db.query(models.Article).filter((models.Article.title.ilike(f"%{search}%"))).all()
-    return db.query(models.Article).order_by(models.Article.created_at.desc()).all()
+        query = query.filter(models.Article.title.ilike(f"%{search}%"))
+    
+    # Get total count before applying limit/offset
+    total_count = query.count()
+    
+    # Apply ordering and pagination
+    articles = query.order_by(models.Article.created_at.desc()).limit(limit).offset(offset).all()
+    
+    return articles, total_count
 
 def link_article_to_source(db: Session, article_id: int, source_id: int):
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
