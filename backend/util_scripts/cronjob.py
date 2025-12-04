@@ -1,9 +1,3 @@
-import sys
-import os
-
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
-
 from backend.services.perplexity_service import perplexity_search_trends, perplexity_find_articles, perplexity_summarize, perplexity_impact_score
 from backend.services.source_services import extract_domain, CREDIBLE_SOURCES
 from backend.db.database import SessionLocal
