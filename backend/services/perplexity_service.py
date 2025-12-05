@@ -13,9 +13,6 @@ def perplexity_search_trends(sector: str | None, tags: list, count: int = 3):
 
     # Create query with sector and tags
     tags_str = ", ".join(tags) 
-
-    query = f"What are the top {count} most trending and newsworthy topics in {sector}?"
-
     payload = {
         "model": "sonar-pro",
         "temperature": 0.1,
@@ -265,6 +262,7 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
                     
                     f"STRUCTURE:\n"
                     f"- Write 800-1200 words\n"
+                    f"- Start with a properly-formatted (e.g., capitalization), no citations (e.g., '[3]'), compelling title\n"
                     f"- Use 2-4 clear section headers wrapped in double-asterisks (e.g., '**Conclusion**')\n"
                     f"- Maintain a neutral, clear, concise, journalistic tone, you're speaking to the layman\n"
                     f"- Cite sources naturally within the text. When using parenthetical citations, wrap the source number in brackets (e.g., '[3]')\n"
