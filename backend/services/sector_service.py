@@ -1,21 +1,27 @@
-import json
-from pathlib import Path
 from datetime import datetime
 from typing import Optional
+from sqlalchemy.orm import Session
 
+# Manages sector rotation state using database storage. State is stored in the database instead of a JSON file.
 class SectorRotationManager:
-    # Initialize the rotation manager
-    # Args: state_file: Path to JSON file storing rotation state
-    def __init__(self, state_file: str = "Sector_rotation_state.json"):
-        self.state_file = Path(state_file)
+    def __init__(self, db: Session):
+        self.db = db
         self.state = self._load_state()
 
     # Load rotation state from file
     def _load_state(self) -> dict:
-        if self.state_file.exists():
-            with open(self.state_file, 'r') as f:
-                return json.load(f)
+        from backend.db import models
+        
+        # Get or create state record
+        state_record = self.db.query(models.SystemState).filter(
+            models.SystemState.key == "sector_rotation"
+        ).first()
+        
+        if state_record:
+            import json
+            return json.loads(state_record.value)
         else:
+            # Create default state
             return {
                 "current_index": 0,
                 "sectors_queue": [],
@@ -24,8 +30,24 @@ class SectorRotationManager:
             }
     # Save rotation state to file
     def _save_state(self):
-        with open(self.state_file, 'w') as f:
-            json.dump(self.state, f, indent=2)
+        from backend.db import models
+        import json
+        
+        state_record = self.db.query(models.SystemState).filter(
+            models.SystemState.key == "sector_rotation"
+        ).first()
+        
+        if state_record:
+            state_record.value = json.dumps(self.state)
+            state_record.updated_at = datetime.now()
+        else:
+            state_record = models.SystemState(
+                key="sector_rotation",
+                value=json.dumps(self.state)
+            )
+            self.db.add(state_record)
+        
+        self.db.commit()
     
     # Initialize or reset the sectors queue
     # Args: sectors: List of sectors names to cycle through
@@ -35,13 +57,12 @@ class SectorRotationManager:
             self.state["current_index"] = 0
             self._save_state()
 
-    # Get the next sectors in rotation
-    # Returns: Topic name, or None if no sectors available
+    # Get the next sector in rotation
     def get_next_sectors(self) -> Optional[str]:
         if not self.state["sectors_queue"]:
             return None
         
-        # Get current sectors
+        # Get current sector
         sector = self.state["sectors_queue"][self.state["current_index"]]
         
         # Move to next index
@@ -59,7 +80,7 @@ class SectorRotationManager:
         
         return sector
     
-    #Get current rotation state
+    # Get current rotation state
     def get_current_state(self) -> dict:
         return {
             "current_sector": self.state["sectors_queue"][self.state["current_index"]] 
@@ -70,13 +91,13 @@ class SectorRotationManager:
             "last_run": self.state["last_run"]
         }
     
-    #Reset rotation to beginning
+    # Reset rotation to beginning
     def reset(self):
         self.state["current_index"] = 0
         self.state["cycle_count"] = 0
         self._save_state()
 
-#Define all sectors with their search tags/keywords
+# Define all sectors with their search tags/keywords
 SECTOR_CONFIG = {
     "Education": {
         "tags": [
@@ -217,7 +238,6 @@ SECTOR_CONFIG = {
 
 # Get enabled sectors 
 def get_enabled_sectors():
-    #Get list of enabled sectors for rotation
     return [sector for sector, config in SECTOR_CONFIG.items() if config["enabled"]]
 
 # Get tags for a specific sector
