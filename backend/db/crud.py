@@ -1,23 +1,16 @@
+# in case you forget: create, read, update, delete (CRUD)
 from typing import cast
 from sqlalchemy.orm import Session
 from backend.db import models
 
-# because I'm going to forget: create, read, update, delete (CRUD)
-
-# -----------------
-# SOURCE FUNCTIONS
-# -----------------
 def get_or_create_sources_bulk(db: Session, sources: list[dict]):
     """
     Take in a list of dictionaries with 'title' and 'url' keys,
     return a list of Source objects, creating any that don't already exist.
     """
     urls = [s["url"] for s in sources]
-
-    # Query for sources that already exist
     existing_sources = db.query(models.Source).filter(models.Source.url.in_(urls)).all()
     existing_urls = {source.url: source.id for source in existing_sources}
-
     sourceIds = []
         
     for source in sources:
@@ -37,44 +30,30 @@ def get_source_by_url(db: Session, url: str):
 def get_source_by_id(db: Session, source_id: int):
     return db.query(models.Source).filter(models.Source.id == source_id).first()
 
-# -----------------
-# TAG FUNCTIONS
-# -----------------
-def get_or_create_tags_bulk(db: Session, tag_names: list[str]):
+def get_or_create_tags_bulk(db: Session, tags: list[str]):
     """
     Take in a list of tag names,
     return a list of Tag objects, creating any that don't already exist.
     """
-    # Query for tags that already exist
-    existing_tags = db.query(models.Tag).filter(models.Tag.name.in_(tag_names)).all()
-    existing_tag_names = {tag.name: tag.id for tag in existing_tags}
-
-    tagIds = []
+    existing_tags = {cast(str, tag.name): cast(int, tag.id) for tag in db.query(models.Tag).filter(models.Tag.name.in_(tags)).all()}
+    tagIDs: list[int] = []
         
-    for name in tag_names:
-        if name in existing_tag_names:
-            tagIds.append(existing_tag_names[name])
+    for name in tags:
+        if name in existing_tags.keys():
+            tagIDs.append(existing_tags[name])
         else:
             new_tag = models.Tag(name=name)
             db.add(new_tag)
             db.flush()
-            tagIds.append(new_tag.id)
+            tagIDs.append(cast(int, new_tag.id))
     
-    return tagIds
+    return tagIDs
 
-# -----------------
-# ARTICLE FUNCTIONS
-# -----------------
-def create_article_with_sources_and_tags(db: Session, title: str, content: str, sources: list[dict], tags: list[str] = None, impact_score: int = -1):
+def create_article_with_sources_and_tags(db: Session, title: str, content: str, sources: list[dict], tags: list[str], impact_score: int = -1):
     article = create_article(db=db, title=title, content=content, impact_score=impact_score)
-
-    # Get or create all the sources and get their IDs
-    # This step will eliminate duplicates added to the db
     sourcesIds = get_or_create_sources_bulk(db=db, sources=sources)
-    tagIds = get_or_create_tags_bulk(db=db, tag_names=tags) if tags else []
+    tagIds = get_or_create_tags_bulk(db=db, tags=tags)
 
-    # Link sources to the article
-    # Extract article_id as int to satisfy type checker
     for source_id in sourcesIds:
         link_article_to_source(db=db, article_id=cast(int, article.id), source_id=source_id)
 
@@ -84,7 +63,7 @@ def create_article_with_sources_and_tags(db: Session, title: str, content: str, 
     return article
 
 def create_article(db: Session, title: str, content: str, impact_score: int = -1):
-    article = models.Article(title=title, content=content,impact_score=impact_score)
+    article = models.Article(title=title, content=content, impact_score=impact_score)
     db.add(article)
     db.commit()
     db.refresh(article)
@@ -94,26 +73,24 @@ def get_article_by_id(db: Session, article_id: int):
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
     return article
 
-def get_all_articles(db: Session, search: str = None):
+def get_all_articles(db: Session, search: str | None = None, limit: int = 20, offset: int = 0):
+    """
+    Get paginated articles, optionally filtered by search query.
+    Returns a tuple of (articles, total_count)
+    """
+    query = db.query(models.Article)
+    
     if search:
-        search_pattern = f"%{search}%"
-        return db.query(models.Article).filter(
-            (models.Article.title.ilike(search_pattern))
-        ).all()
-    return db.query(models.Article).order_by(models.Article.created_at.desc()).all()
+        query = query.filter(models.Article.title.ilike(f"%{search}%"))
+    
+    # Get total count before applying limit/offset
+    total_count = query.count()
+    
+    # Apply ordering and pagination
+    articles = query.order_by(models.Article.created_at.desc()).limit(limit).offset(offset).all()
+    
+    return articles, total_count
 
-def update_article_impact_score(db: Session, article_id: int, impact_score: int):
-    article = db.query(models.Article).filter(models.Article.id == article_id).first()
-    if not article:
-        return None
-    article.impact_score = cast(int, impact_score)
-    db.commit()
-    db.refresh(article)
-    return article
-
-# -----------------
-# LINK FUNCTIONS
-# -----------------
 def link_article_to_source(db: Session, article_id: int, source_id: int):
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
     source = db.query(models.Source).filter(models.Source.id == source_id).first()

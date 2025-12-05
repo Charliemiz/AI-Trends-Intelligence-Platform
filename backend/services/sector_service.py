@@ -1,67 +1,75 @@
-import json
-from pathlib import Path
 from datetime import datetime
 from typing import Optional
+from sqlalchemy.orm import Session
 
-class TopicRotationManager:
-    def __init__(self, state_file: str = "topic_rotation_state.json"):
-        """
-        Initialize the rotation manager
-        
-        Args:
-            state_file: Path to JSON file storing rotation state
-        """
-        self.state_file = Path(state_file)
+# Manages sector rotation state using database storage. State is stored in the database instead of a JSON file.
+class SectorRotationManager:
+    def __init__(self, db: Session):
+        self.db = db
         self.state = self._load_state()
-    
+
+    # Load rotation state from file
     def _load_state(self) -> dict:
-        """Load rotation state from file"""
-        if self.state_file.exists():
-            with open(self.state_file, 'r') as f:
-                return json.load(f)
+        from backend.db import models
+        
+        # Get or create state record
+        state_record = self.db.query(models.SystemState).filter(
+            models.SystemState.key == "sector_rotation"
+        ).first()
+        
+        if state_record:
+            import json
+            return json.loads(state_record.value)
         else:
+            # Create default state
             return {
                 "current_index": 0,
-                "topics_queue": [],
+                "sectors_queue": [],
                 "last_run": None,
                 "cycle_count": 0
             }
-    
+    # Save rotation state to file
     def _save_state(self):
-        """Save rotation state to file"""
-        with open(self.state_file, 'w') as f:
-            json.dump(self.state, f, indent=2)
-    
-    def initialize_topics(self, topics: list):
-        """
-        Initialize or reset the topics queue
+        from backend.db import models
+        import json
         
-        Args:
-            topics: List of topic names to cycle through
-        """
-        if not self.state["topics_queue"] or set(topics) != set(self.state["topics_queue"]):
-            self.state["topics_queue"] = topics.copy()
+        state_record = self.db.query(models.SystemState).filter(
+            models.SystemState.key == "sector_rotation"
+        ).first()
+        
+        if state_record:
+            state_record.value = json.dumps(self.state)
+            state_record.updated_at = datetime.now()
+        else:
+            state_record = models.SystemState(
+                key="sector_rotation",
+                value=json.dumps(self.state)
+            )
+            self.db.add(state_record)
+        
+        self.db.commit()
+    
+    # Initialize or reset the sectors queue
+    # Args: sectors: List of sectors names to cycle through
+    def initialize_sectors(self, sectors: list):
+        if not self.state["sectors_queue"] or set(sectors) != set(self.state["sectors_queue"]):
+            self.state["sectors_queue"] = sectors.copy()
             self.state["current_index"] = 0
             self._save_state()
-    
-    def get_next_topic(self) -> Optional[str]:
-        """
-        Get the next topic in rotation
-        
-        Returns:
-            Topic name, or None if no topics available
-        """
-        if not self.state["topics_queue"]:
+
+    # Get the next sector in rotation
+    def get_next_sectors(self) -> Optional[str]:
+        if not self.state["sectors_queue"]:
             return None
         
-        # Get current topic
-        topic = self.state["topics_queue"][self.state["current_index"]]
+        # Get current sector
+        sector = self.state["sectors_queue"][self.state["current_index"]]
         
         # Move to next index
         self.state["current_index"] += 1
         
-        # Reset if we've gone through all topics
-        if self.state["current_index"] >= len(self.state["topics_queue"]):
+        # Reset if we've gone through all sectors
+        if self.state["current_index"] >= len(self.state["sectors_queue"]):
             self.state["current_index"] = 0
             self.state["cycle_count"] += 1
         
@@ -70,21 +78,21 @@ class TopicRotationManager:
         
         self._save_state()
         
-        return topic
+        return sector
     
+    # Get current rotation state
     def get_current_state(self) -> dict:
-        """Get current rotation state"""
         return {
-            "current_topic": self.state["topics_queue"][self.state["current_index"]] 
-                           if self.state["topics_queue"] else None,
-            "topics_remaining": len(self.state["topics_queue"]) - self.state["current_index"],
-            "total_topics": len(self.state["topics_queue"]),
+            "current_sector": self.state["sectors_queue"][self.state["current_index"]] 
+                           if self.state["sectors_queue"] else None,
+            "sectors_remaining": len(self.state["sectors_queue"]) - self.state["current_index"],
+            "total_sectors": len(self.state["sectors_queue"]),
             "cycle_count": self.state["cycle_count"],
             "last_run": self.state["last_run"]
         }
     
+    # Reset rotation to beginning
     def reset(self):
-        """Reset rotation to beginning"""
         self.state["current_index"] = 0
         self.state["cycle_count"] = 0
         self._save_state()
@@ -226,37 +234,16 @@ SECTOR_CONFIG = {
     }
 }
 
-# ==========================================
 # FUNCTIONS FOR TOPIC ROTATION
-# ==========================================
 
+# Get enabled sectors 
 def get_enabled_sectors():
-    """Get list of enabled sectors for rotation"""
     return [sector for sector, config in SECTOR_CONFIG.items() if config["enabled"]]
 
-
+# Get tags for a specific sector
 def get_sector_tags(sector):
-    """Get tags for a specific sector"""
     return SECTOR_CONFIG.get(sector, {}).get("tags", [])
 
-
+# Get complete config for a sector
 def get_sector_config(sector):
-    """Get complete config for a sector"""
     return SECTOR_CONFIG.get(sector, {})
-
-# ==========================================
-# FUNCTIONS FOR QUERY CATEGORIZATION
-# ==========================================
-
-def categorize_sector(query: str) -> str:
-    query_lower = query.lower()
-    
-    # Check each sector's keywords
-    for sector, config in SECTOR_CONFIG.items():
-        keywords = config.get("tags", [])
-        for keyword in keywords:
-            if keyword in query_lower:
-                return sector
-    
-    # No match found
-    return "General"

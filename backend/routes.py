@@ -3,7 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.db.database import get_db
 from backend.db.crud import get_all_articles, get_article_by_id
-from backend.db.schemas import ArticleSchema, ArticleListSchema, ChatMessage, SessionCreateRequest, SessionResponse, ChatRequest, ChatResponse
+from backend.db.schemas import ( 
+    ArticleSchema, ChatMessage, SessionCreateRequest, SessionResponse,
+    ChatRequest, ChatResponse, PaginatedArticlesResponse
+)
 from backend.services.openai_service import openai_chat_service
 from backend.services.session_service import (
     create_session_with_context, get_session, add_message_to_session,
@@ -12,7 +15,6 @@ from backend.services.session_service import (
 import logging
 from typing import Optional
 from fastapi import Query
-from backend.services.perplexity_service import perplexity_search_simple
 
 router = APIRouter()
 logging.basicConfig(level=logging.INFO)
@@ -28,20 +30,31 @@ def read_root():
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
-@router.get("/articles", response_model=list[ArticleListSchema])
+@router.get("/articles", response_model=PaginatedArticlesResponse)
 def get_articles(
     db: Session = Depends(get_db),
-    search: Optional[str] = Query(None)):
+    search: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100)):
     try:
+        offset = (page - 1) * page_size
+        
         if search:
-            logger.info(f"Searching articles with query: {search}")
-            articles = get_all_articles(db, search=search)
-            logger.info(f"Found {len(articles)} articles matching search query")
-            return articles
+            logger.info(f"Searching articles with query: {search}, page: {page}, size: {page_size}")
         else:
-            articles = get_all_articles(db)
-        logger.info(f"Successfully returned {len(articles)} articles")
-        return articles
+            logger.info(f"Fetching articles - page: {page}, size: {page_size}")
+        
+        articles, total_count = get_all_articles(db, search=search, limit=page_size, offset=offset)
+        total_pages = (total_count + page_size - 1) // page_size  # Ceiling division
+        
+        logger.info(f"Returned {len(articles)} articles ({total_count} total)")
+        return {
+            "items": articles,
+            "total_count": total_count,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages
+        }
     except Exception as e:
         logger.error(f"Error in get_articles: {e}", exc_info=True)
         raise
@@ -133,9 +146,3 @@ def close_chat_session(session_id: str):
     except Exception as e:
         logger.error(f"Error closing session: {e}", exc_info=True)
         raise
-
-@router.get("/perplexity/test")
-def perplexity_test():
-    test_query = "What are the latest trends in artificial intelligence?"
-    result = perplexity_search_simple(test_query)
-    return result
