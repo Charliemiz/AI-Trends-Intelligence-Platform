@@ -14,7 +14,7 @@ A comprehensive intelligence platform for tracking and analyzing AI industry tre
 
 ## API Endpoints
 
-- **Production API**: https://ai-trends-intelligence-platform-production.up.railway.app
+- **Production API**: https://fastapi-trends-app.azurewebsites.net/
 - **Hosted Frontend**: https://ai-trends-intelligence-platform.vercel.app/
 
 ## Prerequisites
