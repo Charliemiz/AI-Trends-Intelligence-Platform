@@ -20,16 +20,6 @@ router = APIRouter()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# get routes (webpages)
-
-@router.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-@router.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
 @router.get("/articles", response_model=PaginatedArticlesResponse)
 def get_articles(
     db: Session = Depends(get_db),
