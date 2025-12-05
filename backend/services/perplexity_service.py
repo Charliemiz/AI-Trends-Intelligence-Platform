@@ -4,6 +4,86 @@ import re, requests, datetime
 
 PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
 
+#Find trends
+def perplexity_search_trends(sector: str | None, tags: list, count: int = 3):
+    headers = {
+        "Authorization": f"Bearer {settings.PERPLEXITY_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    # Create query with sector and tags
+    tags_str = ", ".join(tags) 
+
+    query = f"What are the top {count} most trending and newsworthy topics in {sector}?"
+
+    payload = {
+        "model": "sonar-pro",
+        "temperature": 0.1,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    f"You are a trend analyst specializing in {sector}. "
+                    f"Find the most current, trending, and newsworthy topics related to: {tags_str} as they concern to AI."
+                )
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Find the top {count} most trending topics in {sector} right now MUST RELATE TO AI.\n\n"
+                    f"Focus on topics related to: {tags_str}\n\n"
+                    f"CRITICAL RULES:\n"
+                    f"- Topics must be CURRENT and TRENDING (last 30 days)\n"
+                    f"- Topics must be SPECIFIC (not generic)\n"
+                    f"- Topics must be NEWSWORTHY (actual events, announcements, developments)\n"
+                    f"- Topics must be about or in somewhat related to AI\n"
+                    f"- Development or news regarding AI in {count}\n"
+                    f"- Topics must be be the same\n"
+                    f"- Topics must 3 distinct topics\n"
+                    f"- List ONLY the topic titles, one per line\n"
+                    f"- No descriptions, no explanations, no numbering\n"
+                    f"- Each topic should be 5-15 words\n\n"
+                    f"Format your response as:\n"
+                    f"[Topic 1]\n"
+                    f"[Topic 2]\n"
+                    f"[Topic 3]"
+                )
+            }
+        ]
+    }
+
+    r = requests.post(PERPLEXITY_ENDPOINT, json=payload, headers=headers, timeout=60)
+    r.raise_for_status()
+    data = r.json()
+    content = data["choices"][0]["message"]["content"]
+    
+    # Parse topics from response
+    lines = [line.strip() for line in content.split("\n") if line.strip()]
+    trending_topics = []
+
+    for line in lines[:count * 2]:  # Look at twice as many lines to be safe
+        # Remove common prefixes (1., •, -, *, etc.)
+        cleaned = line.lstrip('0123456789.-•*# \t')
+        
+        # Remove "Topic:" or similar prefixes
+        if ':' in cleaned:
+            cleaned = cleaned.split(':', 1)[1].strip()
+
+        # Must be substantial (not just a word)
+        if cleaned and len(cleaned) > 15 and len(cleaned) < 200:
+            trending_topics.append(cleaned)
+
+        if len(trending_topics) >= count:
+            break
+
+    # Return empty list if not enough valid topics found
+    if len(trending_topics) < 2:
+        print(f"⚠️  Only found {len(trending_topics)} AI-related topics for {sector}, returning empty list")
+
+        return []
+    
+    return trending_topics[:count]
+
 # Find articles
 def perplexity_find_articles(query: str, count: int = 5):
    
