@@ -121,7 +121,7 @@ def perplexity_find_articles(query: str, count: int = 5):
     return articles[:count]
 
     # Writes a summary about our trends using source articles we recieved
-def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles: list = None):
+def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles: list | None = None):
     load_dotenv(find_dotenv())
     api_key = os.getenv("PERPLEXITY_API_KEY")
     if not api_key:
@@ -202,9 +202,11 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
                     
                     f"STRUCTURE:\n"
                     f"- Write 800-1200 words\n"
-                    f"- Use 2-4 clear section headers\n"
-                    f"- Maintain neutral, journalistic tone\n"
-                    f"- Cite sources naturally in the text\n\n"
+                    f"- Use 2-4 clear section headers wrapped in double-asterisks (e.g., '**Conclusion**')\n"
+                    f"- Maintain a neutral, clear, concise, journalistic tone, you're speaking to the layman\n"
+                    f"- Cite sources naturally within the text. When using parenthetical citations, wrap the source number in brackets (e.g., '[3]')\n"
+                    f"- Include newline and tab characters, if needed, wrapped in brackets (e.g., '[\\n]', '[\\t]')\n"
+                    f"- Avoid using any additional text features (e.g., bullet lists). Stick to strictly text, headers, newlines, tabs, and citations\n\n"
                     
                     f"TAGS REQUIREMENTS:\n"
                     f"- Include 5-10 relevant tags\n"
