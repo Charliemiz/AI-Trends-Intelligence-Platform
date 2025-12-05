@@ -443,3 +443,60 @@ CREDIBLE_SOURCES = {
     "wmo.int",
     "york.ac.uk",
 }
+
+# Right now only used to filter out sources that are only user generated content
+BLACKLISTED_SOURCES = {
+    # Social Media Platforms (user-generated content)
+    "twitter.com",
+    "x.com",
+    "facebook.com",
+    "instagram.com",
+    "threads.net",
+    "tiktok.com",
+    "snapchat.com",
+    "linkedin.com", 
+    "pinterest.com",
+    "tumblr.com",
+    "mastodon.social",
+    "truthsocial.com",
+    
+    # Video Platforms (user-generated)
+    "youtube.com",
+    "youtu.be",
+    "vimeo.com",
+    "dailymotion.com",
+    "twitch.tv",
+    
+    # Forums & Discussion Boards
+    "reddit.com",
+    "quora.com",
+    "stackexchange.com",
+    "stackoverflow.com",
+    "slack.com",
+    
+    # Blogging Platforms (user-generated)
+    "medium.com",
+    "substack.com",
+    "blogspot.com",
+    "wordpress.com",  
+    "wix.com",
+    "squarespace.com",
+    "ghost.io",
+    "blogger.com",
+    
+    # Content Aggregators (user-submitted)
+    "digg.com",
+    "slashdot.org",
+    "hackernews.com",
+    "news.ycombinator.com",
+
+    # Q&A Sites
+    "answers.com",
+    "answers.yahoo.com",
+    "askme.com",
+    
+    # Other User-Generated Platforms
+    "pastebin.com",
+    "gist.github.com",
+    "notion.so",  #
+}

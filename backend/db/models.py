@@ -46,3 +46,11 @@ class Tag(Base):
     name = Column(String, unique=True, nullable=False)
 
     articles = relationship('Article', secondary='article_tags', back_populates='tags')
+
+class SystemState(Base):
+    __tablename__ = 'sector_state'
+    
+    id = Column(Integer, primary_key=True)
+    key = Column(String, unique=True, nullable=False)
+    value = Column(Text, nullable=False)
+    updated_at = Column(TIMESTAMP, server_default="CURRENT_TIMESTAMP", nullable=False)

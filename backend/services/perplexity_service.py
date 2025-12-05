@@ -190,8 +190,8 @@ def perplexity_search_trends(sector: str | None, tags: list, count: int = 3):
     return trending_topics[:count]
 
 # Find articles
-def perplexity_find_articles(query: str, count: int = 5, credible_sources=None):
-    from backend.services.source_services import extract_domain
+def perplexity_find_articles(query: str, count: int = 5):
+    from backend.services.source_services import extract_domain, CREDIBLE_SOURCES, BLACKLISTED_SOURCES
     
     load_dotenv(find_dotenv())
     api_key = os.getenv("PERPLEXITY_API_KEY")
@@ -247,13 +247,15 @@ def perplexity_find_articles(query: str, count: int = 5, credible_sources=None):
     for result in search_results[:count]:
         url = result.get("url", "")
         domain = extract_domain(url) if url else ""
-        is_trusted = domain in credible_sources if credible_sources else False
+        is_trusted = domain in CREDIBLE_SOURCES if CREDIBLE_SOURCES else False
+        black_listed = domain in BLACKLISTED_SOURCES if BLACKLISTED_SOURCES else False
         
         articles.append({
             "title": result.get("title", ""),
             "url": url,
             "domain": domain,
-            "trusted": is_trusted
+            "trusted": is_trusted,
+            "blacklisted": black_listed
         })
     
     print(f"  Articles from search_results: {len(articles)}")
@@ -274,12 +276,14 @@ def perplexity_find_articles(query: str, count: int = 5, credible_sources=None):
             
             if url.startswith("http"):
                 domain = extract_domain(url)
-                is_trusted = domain in credible_sources if credible_sources else False               
+                is_trusted = domain in CREDIBLE_SOURCES if CREDIBLE_SOURCES else False   
+                black_listed = domain in BLACKLISTED_SOURCES if BLACKLISTED_SOURCES else False            
                 articles.append({
                     "title": "",  
                     "url": url,
                     "domain": domain,
-                    "trusted": is_trusted
+                    "trusted": is_trusted,
+                    "blacklisted": black_listed
                 })
             
             if len(articles) >= count:
@@ -296,7 +300,7 @@ def perplexity_find_articles(query: str, count: int = 5, credible_sources=None):
     return articles[:count]
 
     # Writes a summary about our trends using source articles we recieved
-def perplexity_summarize(query: str, articles: list):
+def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles: list = None):
     load_dotenv(find_dotenv())
     api_key = os.getenv("PERPLEXITY_API_KEY")
     if not api_key:
@@ -307,85 +311,55 @@ def perplexity_summarize(query: str, articles: list):
         "Content-Type": "application/json"
     }
 
-    # Step 1: Fetch full content from each article URL using sonar-pro
-    print(f"Fetching content from {len(articles)} articles...")
-    articles_with_content = []
+    # Combine articles but mark which are trusted
+    all_articles = []
     
-    for i, article in enumerate(articles):
+    for article in trusted_articles:
+        all_articles.append({**article, "is_trusted": True})
+    
+    if uncertain_articles:
+        for article in uncertain_articles:
+            all_articles.append({**article, "is_trusted": False})
+    
+    print(f"Providing {len(all_articles)} URLs to Perplexity ({len(trusted_articles)} trusted, {len(uncertain_articles) if uncertain_articles else 0} uncertain)...")
+    
+    # Build URL list with trust markers
+    trusted_urls = []
+    uncertain_urls = []
+    
+    for article in all_articles:
         url = article.get("url", "")
-        if not url:
-            continue
-            
-        fetch_payload = {
-            "model": "sonar-pro",
-            "temperature": 0.1,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": f"Read and extract the full text content from this article: {url}\n\nProvide the complete article text with all key information, statistics, quotes, and details."
-                }
-            ]
-        }
+        title = article.get("title", "")
         
-        try:
-            r_fetch = requests.post(PERPLEXITY_ENDPOINT, json=fetch_payload, headers=headers, timeout=45)
-            r_fetch.raise_for_status()
-            fetch_data = r_fetch.json()
-            
-            full_content = fetch_data["choices"][0]["message"]["content"]
-            articles_with_content.append({
-                "url": url,
-                "title": article.get("title", ""),
-                "content": full_content,
-                "index": i + 1
-            })
-            print(f"  ✓ Fetched content from article {i+1}/{len(articles)}")
-        except Exception as e:
-            print(f"  ✗ Failed to fetch article {i+1}: {e}")
-            # Add with empty content so we can still track it
-            articles_with_content.append({
-                "url": url,
-                "title": article.get("title", ""),
-                "content": "",
-                "index": i + 1
-            })
+        if article.get("is_trusted"):
+            trusted_urls.append(f"- {title}: {url}")
+        else:
+            uncertain_urls.append(f"- {title}: {url}")
     
-    if not articles_with_content:
-        raise RuntimeError("Failed to fetch any article content")
+    # Build the URL context
+    urls_text = ""
     
-    # Step 2: Prepare the context with all fetched articles
-    articles_sections = []
-    for article in articles_with_content:
-        if article['content']:
-            articles_sections.append(
-                f"SOURCE [{article['index']}]:\n"
-                f"Title: {article['title']}\n"
-                f"URL: {article['url']}\n\n"
-                f"Content:\n{article['content']}"
-            )
+    if trusted_urls:
+        urls_text += "TRUSTED SOURCES (prioritize these):\n"
+        urls_text += "\n".join(trusted_urls)
     
-    articles_text = "\n\n" + "="*80 + "\n\n"
-    articles_text += ("\n\n" + "="*80 + "\n\n").join(articles_sections)
+    if uncertain_urls:
+        urls_text += "\n\nUNCERTAIN SOURCES (use for additional context):\n"
+        urls_text += "\n".join(uncertain_urls)
     
-    # Check if content is too long
-    max_chars = 100000  # Conservative limit
-    if len(articles_text) > max_chars:
-        print(f"  ⚠ Content too long ({len(articles_text)} chars), truncating...")
-        articles_text = articles_text[:max_chars] + "\n\n[Content truncated due to length]"
-    
-    # Step 3: Use sonar model with explicit instructions to NOT search
-    
+    # Let Perplexity search and fetch from these URLs
     payload = {
-        "model": "sonar",  
+        "model": "sonar-pro",  # Use sonar-pro for web search capability
         "temperature": 0.1,
         "messages": [
             {
                 "role": "system",
                 "content": (
                     f"You are a professional research journalist. "
-                    f"You have been provided with the complete content from {len(articles_with_content)} specific articles below. "
-                    f"You must write ONLY using information from these provided articles. "
-                    f"Do NOT search for additional sources. Do NOT add any external knowledge."
+                    f"Use the provided URLs to research and write a comprehensive article. "
+                    f"PRIORITIZE information from [TRUSTED] sources. "
+                    f"Use [UNCERTAIN] sources only for additional context. "
+                    f"When information conflicts, prefer [TRUSTED] sources."
                 )
             },
             {
@@ -393,25 +367,23 @@ def perplexity_summarize(query: str, articles: list):
                 "content": (
                     f"Write a comprehensive article about: {query}\n\n"
                     
+                    f"Research these sources:\n\n"
+                    f"{urls_text}\n\n"
+                    
                     f"CRITICAL RULES:\n"
-                    f"- Use ONLY information from the articles provided below\n"
-                    f"- Each article is marked with [SOURCE X] - cite using [X]\n"
-                    f"- After EVERY factual claim, immediately cite the source number in brackets\n"
-                    f"- Format: 'The market grew to $2.79 billion[1]' NOT 'The market grew to $2.79 billion. [1]'\n"
-                    f"- NEVER bundle citations like [1][2][3] unless sources say the EXACT same thing\n"
-                    f"- Do NOT add information not in the provided articles\n"
-                    f"- Do NOT use your general knowledge\n\n"
-                    f"- Synthesize information from MULTIPLE sources effectively\n"
-                    f"- Include specific details, quotes, statistics, and examples from the sources\n"
+                    f"- Read and synthesize information from the URLs provided above\n"
+                    f"- PRIORITIZE information from TRUSTED sources\n"
+                    f"- Use UNCERTAIN sources only for additional context when TRUSTED sources are limited\n"
+                    f"- When information conflicts, prefer TRUSTED sources\n"
+                    f"- Include specific details, quotes, statistics from the sources\n"
                     f"- Act as a NEUTRAL party\n"
-                    f"- Do NOT use poetic or creative writing language\n"
-                    f"- Write like a professional, comprehensive news article\n"
-                    f"- Cover different angles and perspectives found in the sources\n\n"
+                    f"- Write like a professional, comprehensive news article\n\n"
                     
                     f"STRUCTURE:\n"
                     f"- Write 800-1200 words\n"
                     f"- Use 2-4 clear section headers\n"
-                    f"- Maintain neutral, journalistic tone\n\n"
+                    f"- Maintain neutral, journalistic tone\n"
+                    f"- Cite sources naturally in the text\n\n"
                     
                     f"TAGS REQUIREMENTS:\n"
                     f"- Include 5-10 relevant tags\n"
@@ -422,11 +394,8 @@ def perplexity_summarize(query: str, articles: list):
 
                     f"FORMAT:\n"
                     f"[Title]\n\n"
-                    f"[Article with citations]\n\n"
-                    f"TAGS: [tag1, tag2, tag3, ...]\n\n"
-                    
-                    f"ARTICLES:\n"
-                    f"{articles_text}"
+                    f"[Article]\n\n"
+                    f"TAGS: [tag1, tag2, tag3, ...]"
                 )
             }
         ]
@@ -438,7 +407,7 @@ def perplexity_summarize(query: str, articles: list):
 
     content = data["choices"][0]["message"]["content"]
     
-    # Parse title, article, and tags from response
+    # Parse response
     tags = []
     
     # Split content to extract tags
@@ -452,9 +421,6 @@ def perplexity_summarize(query: str, articles: list):
     title = ""                         
     article_text = ""
 
-    for i, line in enumerate(lines): 
-        article_text = ""
-    
     for i, line in enumerate(lines):
         if line.startswith("##"):
             title = line.replace("##", "").strip()
@@ -462,20 +428,18 @@ def perplexity_summarize(query: str, articles: list):
             article_text = "\n".join(lines[i+1:]).strip()
             break
     
-    # If no ## header found, look for content after first line
     if not title and lines:
         title = lines[0].strip()
         article_text = "\n".join(lines[1:]).strip()
     
-    # Fallback if parsing fails
     if not title:
         title = f"Article about {query}"
     if not article_text:
         article_text = main_content
 
-    # Return the original articles as sources
+    # Return sources (the URLs we provided)
     sources = []
-    for article in articles:
+    for article in all_articles:
         sources.append({
             "title": article.get("title", ""),
             "url": article.get("url", ""),
