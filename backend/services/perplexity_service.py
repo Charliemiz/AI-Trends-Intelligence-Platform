@@ -1,26 +1,14 @@
-from dotenv import find_dotenv, load_dotenv
-import requests
-import os, datetime
-from perplexity import *
+from backend.services.source_services import extract_domain, CREDIBLE_SOURCES, BLACKLISTED_SOURCES
 from backend.config import settings
-import re
+import re, requests, datetime
 
 PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
 
-# New function using the official Perplexity SDK
-# We may need to make a new api key for this
-
 # Find articles
 def perplexity_find_articles(query: str, count: int = 5):
-    from backend.services.source_services import extract_domain, CREDIBLE_SOURCES, BLACKLISTED_SOURCES
-    
-    load_dotenv(find_dotenv())
-    api_key = os.getenv("PERPLEXITY_API_KEY")
-    if not api_key:
-        raise RuntimeError("Missing PERPLEXITY_API_KEY")
-
+   
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {settings.PERPLEXITY_API_KEY}",
         "Content-Type": "application/json"
     }
 
@@ -122,13 +110,8 @@ def perplexity_find_articles(query: str, count: int = 5):
 
     # Writes a summary about our trends using source articles we recieved
 def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles: list | None = None):
-    load_dotenv(find_dotenv())
-    api_key = os.getenv("PERPLEXITY_API_KEY")
-    if not api_key:
-        raise RuntimeError("Missing PERPLEXITY_API_KEY")
-
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {settings.PERPLEXITY_API_KEY}",
         "Content-Type": "application/json"
     }
 
@@ -212,6 +195,7 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
                     f"- Include 5-10 relevant tags\n"
                     f"- Tags should include: companies mentioned, technologies discussed, key people, industries, concepts, or products\n"
                     f"- Use proper capitalization for company/product names (e.g., 'OpenAI', 'GPT-4', 'Microsoft')\n"
+                    f"- Do not lead or wrap tags with characters (e.g., '## AI', '[Technology]')\n"
                     f"- Keep tags concise (1-3 words each)\n"
                     f"- Separate tags with commas\n\n"
 
@@ -280,13 +264,8 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
 
     # Returns an impact score for our end article 
 def perplexity_impact_score(article_title: str, article_content: str, sector: str | None):
-    load_dotenv(find_dotenv())
-    api_key = os.getenv("PERPLEXITY_API_KEY")
-    if not api_key:
-        raise RuntimeError("Missing PERPLEXITY_API_KEY")
-
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {settings.PERPLEXITY_API_KEY}",
         "Content-Type": "application/json"
     }
 
