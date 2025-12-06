@@ -45,11 +45,6 @@ def main():
                 # Filter to trusted and uncertain
                 trusted_articles = [a for a in valid_articles if a.get("trusted", False)]
                 uncertain_articles = [a for a in valid_articles if not a.get("trusted", False)]
-                
-                # Skip if no trusted sources
-                if not trusted_articles:
-                    logger.warning(f"No trusted sources for: {trend}, skipping...")
-                    continue
 
                 query = f"Write an article summarizing and explaining {trend}"
                 logger.info(f"Searching for: {query}")

@@ -14,36 +14,20 @@ def perplexity_search_trends(sector: str | None, tags: list, count: int = 3):
     # Create query with sector and tags
     tags_str = ", ".join(tags) 
     payload = {
-        "model": "sonar-pro",
+        "model": "sonar",  # Changed from sonar-pro to avoid meta-commentary
         "temperature": 0.1,
         "messages": [
             {
                 "role": "system",
-                "content": (
-                    f"You are a trend analyst specializing in {sector}. "
-                    f"Find the most current, trending, and newsworthy topics related to: {tags_str} as they concern to AI."
-                )
+                "content": f"You are a trend analyst. Find current trending AI topics in {sector}."
             },
             {
                 "role": "user",
                 "content": (
-                    f"Find the top {count} most trending topics in {sector} right now MUST RELATE TO AI.\n\n"
-                    f"Focus on topics related to: {tags_str}\n\n"
-                    f"CRITICAL RULES:\n"
-                    f"- Topics must be CURRENT and TRENDING (last 30 days)\n"
-                    f"- Topics must be SPECIFIC (not generic)\n"
-                    f"- Topics must be NEWSWORTHY (actual events, announcements, developments)\n"
-                    f"- Topics must be about or in somewhat related to AI\n"
-                    f"- Development or news regarding AI in {count}\n"
-                    f"- Topics must be be the same\n"
-                    f"- Topics must 3 distinct topics\n"
-                    f"- List ONLY the topic titles, one per line\n"
-                    f"- No descriptions, no explanations, no numbering\n"
-                    f"- Each topic should be 5-15 words\n\n"
-                    f"Format your response as:\n"
-                    f"[Topic 1]\n"
-                    f"[Topic 2]\n"
-                    f"[Topic 3]"
+                    f"What are the top {count} trending AI topics in {sector} right now? "
+                    f"Focus on: {tags_str}. "
+                    f"Requirements: Current (last 30 days), specific, newsworthy, AI-related. "
+                    f"List {count} topic titles only, one per line, 8-20 words each, no numbering or descriptions."
                 )
             }
         ]
@@ -54,21 +38,31 @@ def perplexity_search_trends(sector: str | None, tags: list, count: int = 3):
     data = r.json()
     content = data["choices"][0]["message"]["content"]
     
+    print(f"\n{'='*60}")
+    print(f"Searching for trending topics in {sector}...")
+    print(f"Raw response: {content[:200]}...")  # Debug
+    
     # Parse topics from response
     lines = [line.strip() for line in content.split("\n") if line.strip()]
     trending_topics = []
 
-    for line in lines[:count * 2]:  # Look at twice as many lines to be safe
+    for line in lines[:count * 3]: 
         # Remove common prefixes (1., •, -, *, etc.)
         cleaned = line.lstrip('0123456789.-•*# \t')
         
         # Remove "Topic:" or similar prefixes
         if ':' in cleaned:
             cleaned = cleaned.split(':', 1)[1].strip()
+        
+        # Remove quotes if present
+        cleaned = cleaned.strip('"\'')
 
-        # Must be substantial (not just a word)
-        if cleaned and len(cleaned) > 15 and len(cleaned) < 200:
-            trending_topics.append(cleaned)
+        # Less strict validation - just needs to be reasonable length
+        if cleaned and 10 <= len(cleaned) <= 250:  
+            # Make sure it's not meta-commentary
+            if not any(skip in cleaned.lower() for skip in ['here are', 'trending topics', 'let me', 'i will', 'based on']):
+                trending_topics.append(cleaned)
+                print(f"  ✓ Found: {cleaned}")
 
         if len(trending_topics) >= count:
             break
@@ -76,8 +70,10 @@ def perplexity_search_trends(sector: str | None, tags: list, count: int = 3):
     # Return empty list if not enough valid topics found
     if len(trending_topics) < 2:
         print(f"⚠️  Only found {len(trending_topics)} AI-related topics for {sector}, returning empty list")
-
         return []
+    
+    print(f"✓ Found {len(trending_topics)} valid topics")
+    print('='*60 + "\n")
     
     return trending_topics[:count]
 
@@ -230,25 +226,22 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
     
     # Let Perplexity search and fetch from these URLs
     payload = {
-        "model": "sonar-pro",  # Use sonar-pro for web search capability
+        "model": "sonar",  
         "temperature": 0.1,
         "messages": [
             {
                 "role": "system",
                 "content": (
-                    f"You are a professional research journalist. "
-                    f"Use the provided URLs to research and write a comprehensive article. "
-                    f"PRIORITIZE information from [TRUSTED] sources. "
-                    f"Use [UNCERTAIN] sources only for additional context. "
-                    f"When information conflicts, prefer [TRUSTED] sources."
+                    "You are a professional research journalist writing comprehensive articles. "
+                    "Write directly without explaining your process."
                 )
             },
             {
                 "role": "user",
                 "content": (
-                    f"Write a comprehensive article about: {query}\n\n"
+                    f"{query}\n\n"
                     
-                    f"Research these sources:\n\n"
+                    f"Use information from these sources:\n\n"
                     f"{urls_text}\n\n"
                     
                     f"CRITICAL RULES:\n"
