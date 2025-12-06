@@ -12,7 +12,7 @@
 
             <!-- Article Title -->
             <h1
-                class="text-5xl md:text-6xl font-extrabold mb-6 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                class="text-5xl md:text-6xl font-extrabold mb-8 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 {{ article.title }}
             </h1>
 

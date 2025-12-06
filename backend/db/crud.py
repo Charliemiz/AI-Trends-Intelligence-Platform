@@ -11,18 +11,18 @@ def get_or_create_sources_bulk(db: Session, sources: list[dict]):
     urls = [s["url"] for s in sources]
     existing_sources = db.query(models.Source).filter(models.Source.url.in_(urls)).all()
     existing_urls = {source.url: source.id for source in existing_sources}
-    sourceIds = []
+    sourceIDs: list[int] = []
         
     for source in sources:
         if source["url"] in existing_urls:
-            sourceIds.append(existing_urls[source["url"]])
+            sourceIDs.append(cast(int, existing_urls[source["url"]]))
         else:
             new_source = models.Source(title=source["title"], url=source["url"], domain=source["domain"], sector=source["sector"])
             db.add(new_source)
             db.flush()
-            sourceIds.append(new_source.id)
+            sourceIDs.append(cast(int, new_source.id))
     
-    return sourceIds
+    return sourceIDs
 
 def get_source_by_url(db: Session, url: str):
     return db.query(models.Source).filter(models.Source.url == url).first()
@@ -51,13 +51,15 @@ def get_or_create_tags_bulk(db: Session, tags: list[str]):
 
 def create_article_with_sources_and_tags(db: Session, title: str, content: str, sources: list[dict], tags: list[str], impact_score: int = -1):
     article = create_article(db=db, title=title, content=content, impact_score=impact_score)
-    sourcesIds = get_or_create_sources_bulk(db=db, sources=sources)
-    tagIds = get_or_create_tags_bulk(db=db, tags=tags)
+    sourceIDs = get_or_create_sources_bulk(db=db, sources=sources)
+    tagIDs = get_or_create_tags_bulk(db=db, tags=tags)
 
-    for source_id in sourcesIds:
+    for source_id, index in enumerate(sourceIDs):
+        # insert article citation updates here
+        update_article_citation_numbering(db=db, article_id=cast(int, article.id), source_id=source_id, citation_number=index)
         link_article_to_source(db=db, article_id=cast(int, article.id), source_id=source_id)
 
-    for tag_id in tagIds:
+    for tag_id in tagIDs:
         link_article_to_tag(db=db, article_id=cast(int, article.id), tag_id=tag_id)
 
     return article
@@ -68,6 +70,10 @@ def create_article(db: Session, title: str, content: str, impact_score: int = -1
     db.commit()
     db.refresh(article)
     return article
+
+def update_article_citation_numbering(db: Session, article_id: int, source_id: int, citation_number: int):
+    # plan here: open article, regex find citation number, replace with source_id, update article
+    return
 
 def get_article_by_id(db: Session, article_id: int): 
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
