@@ -54,9 +54,7 @@ def create_article_with_sources_and_tags(db: Session, title: str, content: str, 
     sourceIDs = get_or_create_sources_bulk(db=db, sources=sources)
     tagIDs = get_or_create_tags_bulk(db=db, tags=tags)
 
-    for source_id, index in enumerate(sourceIDs):
-        # insert article citation updates here
-        update_article_citation_numbering(db=db, article_id=cast(int, article.id), source_id=source_id, citation_number=index)
+    for source_id in sourceIDs:
         link_article_to_source(db=db, article_id=cast(int, article.id), source_id=source_id)
 
     for tag_id in tagIDs:
@@ -70,10 +68,6 @@ def create_article(db: Session, title: str, content: str, impact_score: int = -1
     db.commit()
     db.refresh(article)
     return article
-
-def update_article_citation_numbering(db: Session, article_id: int, source_id: int, citation_number: int):
-    # plan here: open article, regex find citation number, replace with source_id, update article
-    return
 
 def get_article_by_id(db: Session, article_id: int): 
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
