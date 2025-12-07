@@ -1,25 +1,149 @@
-# AI-Trends-Intelligence-Platform
-### Run Frontend:
-- Need .env file with all secrets
-- cd frontend
-- npm install (install all necessary node packages)
-- npm run dev
+# AI Trends Intelligence Platform
 
-### Run Tailwind:
-- cd frontend
-- npx tailwindcss -i ./src/assets/main.css -o ./src/assets/tailwind.css -w
-Now all changes made to frontend css should be processes
+A comprehensive intelligence platform for tracking and analyzing AI industry trends, built with Vue.js and FastAPI.
 
-# Run API on Localhost:
-- cd .. (be at project root)
-- Make a virtual environment if you don't have one
-- venv\Scripts\activate (or whatever name of virtual environment is)
-- pip install -r requirements.txt
-- cd backend
-- fastapi dev main.py
+## Tech Stack
 
-# API BASE URL:
-### https://ai-trends-intelligence-platform-production.up.railway.app
+- **Frontend**: Vue.js, Tailwind CSS
+- **Backend**: FastAPI (Python)
+- **Database**: Neon DB (PostgreSQL)
+- **Hosting**: 
+  - Backend API: Azure
+  - Frontend: Vercel
+- **CI/CD**: GitHub Actions (automated workflows via cron jobs)
 
-# Hosted Frontend (Vercel):
-### https://ai-trends-intelligence-platform.vercel.app/
+## API Endpoints
+
+- **Production API**: https://fastapi-trends-app.azurewebsites.net/
+- **Hosted Frontend**: https://ai-trends-intelligence-platform.vercel.app/
+
+## Prerequisites
+
+- Node.js (v16 or higher)
+- Python 3.8+
+- pip (Python package manager)
+- npm (Node package manager)
+
+## Setup & Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd AI-Trends-Intelligence-Platform
+```
+
+### 2. Environment Setup
+
+Create a `.env` file in the `frontend` directory with all required secrets (API keys, database credentials, etc.)
+
+### 3. Backend Setup
+
+#### Create Virtual Environment
+
+```bash
+# From project root
+python -m venv venv
+```
+
+#### Activate Virtual Environment
+
+**Windows:**
+```bash
+venv\Scripts\activate
+```
+
+**Mac/Linux:**
+```bash
+source venv/bin/activate
+```
+
+#### Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Frontend Setup
+
+```bash
+cd frontend
+npm install
+```
+
+## Running Locally
+
+### Start the Backend API
+
+From the **project root** directory (with virtual environment activated):
+
+```bash
+python -m uvicorn backend.main:app --host 0.0.0.0
+```
+
+The API will be available at `http://localhost:8000`
+
+### Start the Frontend
+
+From the **frontend** directory:
+
+```bash
+npm run dev
+```
+
+The frontend will typically run on `http://localhost:5173` (or the next available port)
+
+### Run Tailwind CSS (Development)
+
+To watch and compile Tailwind CSS changes, run this in a separate terminal from the **frontend** directory:
+
+```bash
+npx tailwindcss -i ./src/assets/main.css -o ./src/assets/tailwind.css -w
+```
+
+## Development Workflow
+
+1. Activate your virtual environment
+2. Start the backend API server
+3. In a new terminal, navigate to frontend and start the dev server
+4. (Optional) In another terminal, run the Tailwind watcher for live CSS updates
+
+## Deployment
+
+### Backend (Azure)
+
+The backend is deployed to Azure and automatically updates via GitHub Actions workflows triggered by cron jobs.
+
+### Frontend (Vercel)
+
+The frontend is hosted on Vercel and deploys automatically on push to the main branch.
+
+### Database
+
+The application uses Neon DB (serverless PostgreSQL) for data storage.
+
+## Project Structure
+
+```
+AI-Trends-Intelligence-Platform/
+├── backend/
+│   ├── main.py           # FastAPI application
+│   └── ...
+├── frontend/
+│   ├── src/
+│   │   ├── assets/
+│   │   │   ├── main.css
+│   │   │   └── tailwind.css
+│   │   └── ...
+│   ├── .env              # Environment variables (not in repo)
+│   └── package.json
+├── requirements.txt      # Python dependencies
+└── venv/                 # Virtual environment (not in repo)
+```
+
+## Contributing
+
+1. Create a new branch for your feature
+2. Make your changes
+3. Test locally
+4. Submit a pull request
