@@ -198,33 +198,25 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
         for article in uncertain_articles:
             all_articles.append({**article, "is_trusted": False})
     
-    print(f"Providing {len(all_articles)} URLs to Perplexity ({len(trusted_articles)} trusted, {len(uncertain_articles) if uncertain_articles else 0} uncertain)...")
+    print(f"Providing {len(all_articles)} numbered sources to Perplexity ({len(trusted_articles)} trusted, {len(uncertain_articles) if uncertain_articles else 0} uncertain)...")
     
-    # Build URL list with trust markers
-    trusted_urls = []
-    uncertain_urls = []
+    # Build NUMBERED source list (prevents reordering)
+    sources_text = ""
     
-    for article in all_articles:
-        url = article.get("url", "")
-        title = article.get("title", "")
-        
-        if article.get("is_trusted"):
-            trusted_urls.append(f"- {title}: {url}")
-        else:
-            uncertain_urls.append(f"- {title}: {url}")
+    # Add trusted sources first
+    source_num = 1
+    for article in trusted_articles:
+        sources_text += f"[{source_num}] [TRUSTED] {article.get('title', 'No title')}\n"
+        sources_text += f"    URL: {article.get('url', '')}\n\n"
+        source_num += 1
     
-    # Build the URL context
-    urls_text = ""
+    # Add uncertain sources after
+    for article in uncertain_articles if uncertain_articles else []:
+        sources_text += f"[{source_num}] [UNCERTAIN] {article.get('title', 'No title')}\n"
+        sources_text += f"    URL: {article.get('url', '')}\n\n"
+        source_num += 1
     
-    if trusted_urls:
-        urls_text += "TRUSTED SOURCES (prioritize these):\n"
-        urls_text += "\n".join(trusted_urls)
-    
-    if uncertain_urls:
-        urls_text += "\n\nUNCERTAIN SOURCES (use for additional context):\n"
-        urls_text += "\n".join(uncertain_urls)
-    
-    # Let Perplexity search and fetch from these URLs
+    # Use sonar model with strict numbered source instructions
     payload = {
         "model": "sonar",  
         "temperature": 0.1,
@@ -232,8 +224,11 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
             {
                 "role": "system",
                 "content": (
-                    "You are a professional research journalist writing comprehensive articles. "
-                    "Write directly without explaining your process."
+                    "You are a professional research journalist. "
+                    "You will be given a numbered list of sources. "
+                    "USE ONLY these sources and cite them by their assigned numbers. "
+                    "DO NOT reorder sources. DO NOT search for additional sources. "
+                    "PRIORITIZE [TRUSTED] sources over [UNCERTAIN] sources."
                 )
             },
             {
@@ -241,39 +236,45 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
                 "content": (
                     f"{query}\n\n"
                     
-                    f"Use information from these sources:\n\n"
-                    f"{urls_text}\n\n"
+                    f"SOURCES (cite using the exact numbers shown):\n\n"
+                    f"{sources_text}\n"
                     
-                    f"CRITICAL RULES:\n"
-                    f"- Read and synthesize information from the URLs provided above\n"
-                    f"- PRIORITIZE information from TRUSTED sources\n"
-                    f"- Use UNCERTAIN sources only for additional context when TRUSTED sources are limited\n"
-                    f"- When information conflicts, prefer TRUSTED sources\n"
-                    f"- Include specific details, quotes, statistics from the sources\n"
-                    f"- Act as a NEUTRAL party\n"
-                    f"- Write like a professional, comprehensive news article\n\n"
+                    f"CRITICAL INSTRUCTIONS:\n"
+                    f"- Write an 800-1200 word comprehensive article\n"
+                    f"- USE ONLY the numbered sources listed above\n"
+                    f"- Cite sources using their EXACT numbers: [1], [2], [3], etc.\n"
+                    f"- DO NOT reorder or renumber sources\n"
+                    f"- DO NOT search for or add additional sources\n"
+                    f"- Prioritize [TRUSTED] sources over [UNCERTAIN] sources\n"
+                    f"- When sources conflict, prefer [TRUSTED] sources\n\n"
                     
                     f"STRUCTURE:\n"
-                    f"- Write 800-1200 words\n"
-                    f"- Start with a properly-formatted (e.g., capitalization), no citations (e.g., '[3]'), compelling title\n"
-                    f"- Use 2-4 clear section headers wrapped in double-asterisks (e.g., '**Conclusion**')\n"
-                    f"- Maintain a neutral, clear, concise, journalistic tone, you're speaking to the layman\n"
-                    f"- Cite sources naturally within the text. When using parenthetical citations, wrap the source number in brackets (e.g., '[3]')\n"
-                    f"- Include newline and tab characters, if needed, wrapped in brackets (e.g., '[\\n]', '[\\t]')\n"
-                    f"- Avoid using any additional text features (e.g., bullet lists). Stick to strictly text, headers, newlines, tabs, and citations\n\n"
+                    f"- Start with a compelling title (proper capitalization, NO citations)\n"
+                    f"- Use 2-4 section headers with double-asterisks (e.g., '**Conclusion**')\n"
+                    f"- Maintain neutral, clear, journalistic tone for general audience\n"
+                    f"- Cite sources naturally in text using brackets: [1], [2], etc.\n"
+                    f"- Format citations like: 'The market grew[3]' NOT 'The market grew. [3]'\n"
+                    f"- Avoid bullet lists - use prose paragraphs only\n\n"
                     
-                    f"TAGS REQUIREMENTS:\n"
-                    f"- Include 5-10 relevant tags\n"
-                    f"- Tags should include: companies mentioned, technologies discussed, key people, industries, concepts, or products\n"
-                    f"- Use proper capitalization for company/product names (e.g., 'OpenAI', 'GPT-4', 'Microsoft')\n"
-                    f"- Do not lead or wrap tags with characters (e.g., '## AI', '[Technology]')\n"
-                    f"- Keep tags concise (1-3 words each)\n"
-                    f"- Separate tags with commas\n\n"
+                    f"TAGS REQUIREMENTS (CRITICAL):\n"
+                    f"- Include EXACTLY 5-10 relevant tags\n"
+                    f"- Tags: companies, technologies, people, industries, concepts, products\n"
+                    f"- Use proper capitalization (e.g., 'OpenAI', 'Microsoft', 'GPT-4')\n"
+                    f"- DO NOT use symbols: NO '**', NO '##', NO '#', NO '['\n"
+                    f"- Format: 'tag1, tag2, tag3' NOT '**tag1**, **tag2**'\n"
+                    f"- Separate with commas only\n\n"
 
-                    f"FORMAT:\n"
-                    f"[Title]\n\n"
-                    f"[Article]\n\n"
-                    f"TAGS: [tag1, tag2, tag3, ...]"
+                    f"FORMAT (MUST FOLLOW EXACTLY):\n"
+                    f"[Title with no markdown]\n\n"
+                    f"[Article with **headers** and [X] citations]\n\n"
+                    f"TAGS: tag1, tag2, tag3, tag4, tag5\n\n"
+                    
+                    f"EXAMPLE CORRECT TAGS:\n"
+                    f"TAGS: Artificial Intelligence, Federal Preemption, AI Policy, Digital Government\n\n"
+                    
+                    f"EXAMPLE WRONG TAGS (DO NOT USE):\n"
+                    f"TAGS: **AI Policy** **Federal Government** (WRONG - no asterisks)\n"
+                    f"TAGS: #AI #Policy (WRONG - no hashtags)"
                 )
             }
         ]
@@ -285,23 +286,35 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
 
     content = data["choices"][0]["message"]["content"]
     
-    # Parse response
+    # Parse tags with cleaning
     tags = []
     
     # Split content to extract tags
     if "TAGS:" in content:
         main_content, tags_part = content.split("TAGS:", 1)
-        tags = [tag.strip() for tag in tags_part.split(",") if tag.strip()]
+        tags_part = tags_part.strip()
+        tags_part = tags_part.strip('*#[]"\'')
+        raw_tags = tags_part.split(",")
+        
+        for tag in raw_tags:
+            cleaned = tag.strip()
+            cleaned = cleaned.strip('*#[]"\'')
+            if cleaned and 2 <= len(cleaned) <= 50:
+                tags.append(cleaned)
+        
+        print(f"  📎 Extracted {len(tags)} tags")
     else:
         main_content = content
+        print(f"No TAGS: found in response")
     
+    # Parse title and article
     lines = main_content.split("\n")  
     title = ""                         
     article_text = ""
 
     for i, line in enumerate(lines):
-        if line.startswith("##"):
-            title = line.replace("##", "").strip()
+        if line.startswith("##") or line.startswith("# "):
+            title = line.replace("##", "").replace("#", "").strip()
         elif line.startswith("ARTICLE:"):
             article_text = "\n".join(lines[i+1:]).strip()
             break
@@ -311,18 +324,40 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
         article_text = "\n".join(lines[1:]).strip()
     
     if not title:
-        title = f"Article about {query}"
+        title = query
     if not article_text:
         article_text = main_content
-
-    # Return sources (the URLs we provided)
-    sources = []
-    for article in all_articles:
-        sources.append({
-            "title": article.get("title", ""),
-            "url": article.get("url", ""),
-            "source": article.get("url", "").split("/")[2] if article.get("url") else ""
-        })
+    
+    # Check if Perplexity used search_results (web search beyond our sources)
+    search_results = data.get("search_results", [])
+    
+    if search_results:
+        # Perplexity searched the web - use what it actually found
+        sources = []
+        for result in search_results:
+            sources.append({
+                "title": result.get("title", ""),
+                "url": result.get("url", ""),
+                "source": result.get("url", "").split("/")[2] if result.get("url") else ""
+            })
+        
+        # Warn if different from what we provided
+        if len(search_results) != len(all_articles):
+            print(f"WARNING: Perplexity used {len(search_results)} sources, we provided {len(all_articles)}")
+            if len(search_results) > len(all_articles):
+                print(f"Perplexity searched beyond our sources and found {len(search_results) - len(all_articles)} extra!")
+        else:
+            print(f"  sources match: {len(sources)} sources used")
+    else:
+        # No search_results, return our original sources
+        sources = []
+        for article in all_articles:
+            sources.append({
+                "title": article.get("title", ""),
+                "url": article.get("url", ""),
+                "source": article.get("url", "").split("/")[2] if article.get("url") else ""
+            })
+        print(f"  Using provided sources: {len(sources)}")
 
     return {
         "title": title,
