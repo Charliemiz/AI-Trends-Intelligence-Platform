@@ -26,7 +26,8 @@ def perplexity_search_trends(sector: str | None, tags: list, count: int = 3):
                 "content": (
                     f"What are the top {count} trending AI topics in {sector} right now? "
                     f"Focus on: {tags_str}. "
-                    f"Requirements: Current (last 30 days), specific, newsworthy, AI-related. "
+                    f"Requirements: Current (last 30 days), specific, newsworthy, AI-related."
+                    f"DO NOT ADD EXTRA CHARS LIKE THAT WOULD NOT BE USED IN NORMAL WRITING (*, ^,  )"
                     f"List {count} topic titles only, one per line, 8-20 words each, no numbering or descriptions."
                 )
             }
