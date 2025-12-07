@@ -1,4 +1,9 @@
 from urllib.parse import urlparse
+import logging
+import re
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def extract_domain(url: str) -> str:
     try:
@@ -10,6 +15,77 @@ def extract_domain(url: str) -> str:
         return domain
     except:
         return ""
+    
+def filter_and_renumber_sources(article_text: str, sources: list, sources_provided_count: int) -> tuple:
+    # Extract all citation numbers from article
+    citations = re.findall(r'\[(\d+)\]', article_text)
+    
+    # Convert to integers and get unique citation numbers (sorted)
+    cited_numbers = sorted(set(int(c) for c in citations))
+    
+    if not cited_numbers:
+        # No citations found, return as-is
+        return article_text, sources, {
+            "total_sources_provided": sources_provided_count,
+            "total_sources_returned": len(sources),
+            "sources_cited": 0,
+            "sources_filtered": 0,
+            "sources_removed": len(sources),
+            "cited_numbers_original": [],
+            "citation_mapping": {},
+            "unused_numbers": list(range(1, len(sources) + 1)),
+            "extra_sources_added": False,
+            "extra_sources_count": 0,
+            "removal_percentage": 100.0
+        }
+    
+    # Create mapping: old citation number -> new citation number
+    # Example: {1: 1, 2: 2, 5: 3, 7: 4}
+    citation_mapping = {old_num: new_num for new_num, old_num in enumerate(cited_numbers, start=1)}
+    
+    # Filter sources to only include cited ones (in citation order)
+    filtered_sources = []
+    for cite_num in cited_numbers:
+        array_index = cite_num - 1  # Convert to 0-based
+        if 0 <= array_index < len(sources):
+            filtered_sources.append(sources[array_index])
+        else:
+            logger.warning(f"Citation [{cite_num}] found but source not in list (have {len(sources)} sources)")
+    
+    renumbered_text = article_text
+    
+    # Step 1: Replace all citations with unique placeholders
+    # Example: [2] -> __CITE_2__, [3] -> __CITE_3__, etc.
+    for old_num in citation_mapping.keys():
+        pattern = r'\[' + str(old_num) + r'\]'
+        placeholder = f'__CITE_{old_num}__'
+        renumbered_text = re.sub(pattern, placeholder, renumbered_text)
+    
+    # Step 2: Replace placeholders with new citation numbers
+    # Example: __CITE_2__ -> [1], __CITE_3__ -> [2], etc.
+    for old_num, new_num in citation_mapping.items():
+        placeholder = f'__CITE_{old_num}__'
+        replacement = f'[{new_num}]'
+        renumbered_text = renumbered_text.replace(placeholder, replacement)
+    
+    # Calculate statistics
+    extra_sources_added = len(sources) > sources_provided_count
+    
+    stats = {
+        "total_sources_provided": sources_provided_count,
+        "total_sources_returned": len(sources),
+        "sources_cited": len(cited_numbers),
+        "sources_filtered": len(filtered_sources),
+        "sources_removed": len(sources) - len(cited_numbers),
+        "cited_numbers_original": cited_numbers,
+        "citation_mapping": citation_mapping,
+        "unused_numbers": [i for i in range(1, len(sources) + 1) if i not in cited_numbers],
+        "extra_sources_added": extra_sources_added,
+        "extra_sources_count": len(sources) - sources_provided_count if extra_sources_added else 0,
+        "removal_percentage": round((len(sources) - len(cited_numbers)) / len(sources) * 100, 1) if sources else 0
+    }
+    
+    return renumbered_text, filtered_sources, stats
 
 CREDIBLE_SOURCES = {
  "abcnews.go.com",
