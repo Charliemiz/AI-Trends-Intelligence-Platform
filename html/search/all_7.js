@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['get_5fall_5farticles_0',['get_all_articles',['../namespacebackend_1_1db_1_1crud.html#ab5dd42eebdf17cfac53263694165efad',1,'backend::db::crud']]],
+  ['get_5farticle_1',['get_article',['../namespacebackend_1_1routes.html#a340a4fbf6f0713c9244ad72cc6d0f5ae',1,'backend::routes']]],
+  ['get_5farticle_5fby_5fid_2',['get_article_by_id',['../namespacebackend_1_1db_1_1crud.html#ade5965d4ac9bdd64df3f6bf691ea5cfe',1,'backend::db::crud']]],
+  ['get_5farticles_3',['get_articles',['../namespacebackend_1_1routes.html#af94cb35ed143505be19aee71d9c6c0c0',1,'backend::routes']]],
+  ['get_5fcurrent_5fstate_4',['get_current_state',['../classbackend_1_1services_1_1sector__service_1_1_sector_rotation_manager.html#aede74e46bffb6a697608b5f46926d107',1,'backend::services::sector_service::SectorRotationManager']]],
+  ['get_5fdb_5',['get_db',['../namespacebackend_1_1db_1_1database.html#a9e38fb35b3f9996e4b3435131c528c01',1,'backend::db::database']]],
+  ['get_5fenabled_5fsectors_6',['get_enabled_sectors',['../namespacebackend_1_1services_1_1sector__service.html#ac3ce442bf19d1521e9a1954d41aac0bb',1,'backend::services::sector_service']]],
+  ['get_5fnext_5fsectors_7',['get_next_sectors',['../classbackend_1_1services_1_1sector__service_1_1_sector_rotation_manager.html#aac1d09bd2d25d559061f43781a024a1a',1,'backend::services::sector_service::SectorRotationManager']]],
+  ['get_5for_5fcreate_5fsources_5fbulk_8',['get_or_create_sources_bulk',['../namespacebackend_1_1db_1_1crud.html#aa1afbc957828cf18044413f334022e6f',1,'backend::db::crud']]],
+  ['get_5for_5fcreate_5ftags_5fbulk_9',['get_or_create_tags_bulk',['../namespacebackend_1_1db_1_1crud.html#adf17ec640c77a359a393fc210c887864',1,'backend::db::crud']]],
+  ['get_5fsector_5fconfig_10',['get_sector_config',['../namespacebackend_1_1services_1_1sector__service.html#ad63eb3b145f669ffb75c695ee1e1425b',1,'backend::services::sector_service']]],
+  ['get_5fsector_5ftags_11',['get_sector_tags',['../namespacebackend_1_1services_1_1sector__service.html#aae4eb03a187203e664f40dc2bd366857',1,'backend::services::sector_service']]],
+  ['get_5fsession_12',['get_session',['../namespacebackend_1_1services_1_1session__service.html#ac4ab123d734289feeec6c52393f45f93',1,'backend::services::session_service']]],
+  ['get_5fsession_5farticle_5fid_13',['get_session_article_id',['../namespacebackend_1_1services_1_1session__service.html#a6f9ba3b8f177bea03611a98d50022a11',1,'backend::services::session_service']]],
+  ['get_5fsession_5fmessages_14',['get_session_messages',['../namespacebackend_1_1services_1_1session__service.html#a9fd993c22e779208e7e39273772ee5ce',1,'backend::services::session_service']]],
+  ['get_5fsource_5fby_5fid_15',['get_source_by_id',['../namespacebackend_1_1db_1_1crud.html#a2da02d968a27fe1c20b96dfb4351abe4',1,'backend::db::crud']]],
+  ['get_5fsource_5fby_5furl_16',['get_source_by_url',['../namespacebackend_1_1db_1_1crud.html#a8ebec810708b7f02806713a78708b457',1,'backend::db::crud']]]
+];

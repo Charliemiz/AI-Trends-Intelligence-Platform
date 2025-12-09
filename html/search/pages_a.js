@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['9_0',['9',['../md_frontend_2node__modules_2postcss-selector-parser_2_c_h_a_n_g_e_l_o_g.html#autotoc_md4749',1,'6.0.9'],['../md_frontend_2node__modules_2prettier_2_t_h_i_r_d-_p_a_r_t_y-_n_o_t_i_c_e_s.html#autotoc_md4863',1,'@glimmer/syntax@v0.94.9'],['../dir_4c3ffd791b497e11292c4ef6acfdd4b4.html#autotoc_md3900',1,'Breaking Changes in Version 9'],['../dir_0b99588e5655e4be1240d9b38eacf24d.html#autotoc_md4540',1,'Breaking Changes in Version 9'],['../md_frontend_2node__modules_2prettier_2_t_h_i_r_d-_p_a_r_t_y-_n_o_t_i_c_e_s.html#autotoc_md5099',1,'postcss-scss@v4.0.9'],['../md_frontend_2node__modules_2flat-cache_2changelog.html#autotoc_md2853',1,'v1.0.9'],['../md_frontend_2node__modules_2which_2_c_h_a_n_g_e_l_o_g.html#autotoc_md6602',1,'v1.0.9'],['../md_frontend_2node__modules_2which_2_c_h_a_n_g_e_l_o_g.html#autotoc_md6589',1,'v1.2.9']]],
+  ['9_200_1',['9 0',['../md_frontend_2node__modules_2optionator_2_c_h_a_n_g_e_l_o_g.html',1,'0.9.0'],['../md_frontend_2node__modules_2estree-walker_2_c_h_a_n_g_e_l_o_g.html#autotoc_md2492',1,'0.9.0'],['../md_frontend_2node__modules_2prettier_2_t_h_i_r_d-_p_a_r_t_y-_n_o_t_i_c_e_s.html#autotoc_md4879',1,'@prettier/cli@v0.9.0']]],
+  ['9_200_202015_2004_2019_2',['1.9.0 / 2015-04-19',['../md_frontend_2node__modules_2mime-db_2_h_i_s_t_o_r_y.html#autotoc_md4075',1,'']]],
+  ['9_200_202016_2008_2016_3',['6.9.0 (2016-08-16)',['../md_frontend_2node__modules_2_0dbabel_2parser_2_c_h_a_n_g_e_l_o_g.html#autotoc_md221',1,'']]],
+  ['9_200_202022_2005_2023_4',['&lt;a href=&quot;https://github.com/pkgjs/parseargs/compare/v0.8.0...v0.9.0&quot;&gt;0.9.0&lt;/a&gt; (2022-05-23)',['../md_frontend_2node__modules_2_0dpkgjs_2parseargs_2_c_h_a_n_g_e_l_o_g.html#autotoc_md633',1,'']]],
+  ['9_200_202023_2006_2016_5',['8.9.0 (2023-06-16)',['../md_frontend_2node__modules_2acorn_2_c_h_a_n_g_e_l_o_g.html#autotoc_md939',1,'']]],
+  ['9_200_202025_2004_2024_6',['&lt;a href=&quot;https://github.com/axios/axios/compare/v1.8.4...v1.9.0&quot;&gt;1.9.0&lt;/a&gt; (2025-04-24)',['../md_frontend_2node__modules_2axios_2_c_h_a_n_g_e_l_o_g.html#autotoc_md1359',1,'']]],
+  ['9_201_7',['hookified@v1.9.1',['../md_frontend_2node__modules_2prettier_2_t_h_i_r_d-_p_a_r_t_y-_n_o_t_i_c_e_s.html#autotoc_md4993',1,'']]],
+  ['9_201_202015_2004_2019_8',['1.9.1 / 2015-04-19',['../md_frontend_2node__modules_2mime-db_2_h_i_s_t_o_r_y.html#autotoc_md4074',1,'']]],
+  ['9_201_202016_2008_2023_9',['6.9.1 (2016-08-23)',['../md_frontend_2node__modules_2_0dbabel_2parser_2_c_h_a_n_g_e_l_o_g.html#autotoc_md219',1,'']]],
+  ['9_201_202022_2006_2020_10',['&lt;a href=&quot;https://github.com/pkgjs/parseargs/compare/v0.9.0...v0.9.1&quot;&gt;0.9.1&lt;/a&gt; (2022-06-20)',['../md_frontend_2node__modules_2_0dpkgjs_2parseargs_2_c_h_a_n_g_e_l_o_g.html#autotoc_md631',1,'']]],
+  ['9_202_202016_2009_2009_11',['6.9.2 (2016-09-09)',['../md_frontend_2node__modules_2_0dbabel_2parser_2_c_h_a_n_g_e_l_o_g.html#autotoc_md218',1,'']]],
+  ['9_202012_2012_2027_12',['&lt;a href=&quot;https://github.com/nodeca/argparse/compare/0.1.8...0.1.9&quot;&gt;0.1.9&lt;/a&gt; - 2012-12-27',['../md_frontend_2node__modules_2argparse_2_c_h_a_n_g_e_l_o_g.html#autotoc_md1287',1,'']]],
+  ['9_202013_2004_2029_13',['0.0.9 - 2013-04-29',['../md_frontend_2node__modules_2form-data_2_c_h_a_n_g_e_l_o_g.html#autotoc_md2995',1,'']]],
+  ['9_202015_2002_2009_14',['2.0.9 / 2015-02-09',['../md_frontend_2node__modules_2mime-types_2_h_i_s_t_o_r_y.html#autotoc_md4139',1,'']]],
+  ['9_202015_2005_2024_15',['0.4.9 / 2015-05-24',['../md_frontend_2node__modules_2iconv-lite_2_changelog.html#autotoc_md3378',1,'']]],
+  ['9_202016_2001_2006_16',['2.1.9 / 2016-01-06',['../md_frontend_2node__modules_2mime-types_2_h_i_s_t_o_r_y.html#autotoc_md4124',1,'']]],
+  ['9_202016_2009_2029_17',['&lt;a href=&quot;https://github.com/nodeca/argparse/compare/1.0.8...1.0.9&quot;&gt;1.0.9&lt;/a&gt; - 2016-09-29',['../md_frontend_2node__modules_2argparse_2_c_h_a_n_g_e_l_o_g.html#autotoc_md1251',1,'']]],
+  ['9_202017_2002_2006_18',['4.0.9 (2017-02-06)',['../md_frontend_2node__modules_2acorn_2_c_h_a_n_g_e_l_o_g.html#autotoc_md1089',1,'']]],
+  ['9_202024_2012_2004_19',['&lt;a href=&quot;https://github.com/axios/axios/compare/v1.7.8...v1.7.9&quot;&gt;1.7.9&lt;/a&gt; (2024-12-04)',['../md_frontend_2node__modules_2axios_2_c_h_a_n_g_e_l_o_g.html#autotoc_md1381',1,'']]],
+  ['9_20x_20',['Variant 1: Drop support for Node.js ≤ 4.4.x and 5.0.0 — 5.9.x.',['../md_frontend_2node__modules_2safer-buffer_2_porting-_buffer.html#autotoc_md5446',1,'']]],
+  ['94_208_21',['94 8',['../md_frontend_2node__modules_2prettier_2_t_h_i_r_d-_p_a_r_t_y-_n_o_t_i_c_e_s.html#autotoc_md4865',1,'@glimmer/util@v0.94.8'],['../md_frontend_2node__modules_2prettier_2_t_h_i_r_d-_p_a_r_t_y-_n_o_t_i_c_e_s.html#autotoc_md4867',1,'@glimmer/wire-format@v0.94.8']]],
+  ['94_209_22',['@glimmer/syntax@v0.94.9',['../md_frontend_2node__modules_2prettier_2_t_h_i_r_d-_p_a_r_t_y-_n_o_t_i_c_e_s.html#autotoc_md4863',1,'']]]
+];
