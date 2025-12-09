@@ -4,8 +4,8 @@ FROM python:3.9-slim
 WORKDIR /code
 
 # Install dependencies
-COPY ./requirements.txt /code/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+COPY ./backend/requirements.txt /code/backend/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/backend/requirements.txt
 
 # Copy the entire project into the container
 COPY . /code
@@ -15,4 +15,4 @@ ENV PORT=8000
 EXPOSE 8000
 
 # Start FastAPI with Uvicorn
-CMD ["sh", "-c", "python -m uvicorn backend.main:app --host 0.0.0.0 --port ${PORT} --reload"]
+CMD ["sh", "-c", "python -m uvicorn backend.main:app --host 0.0.0.0 --port ${PORT}"]

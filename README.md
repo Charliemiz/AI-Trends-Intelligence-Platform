@@ -35,7 +35,7 @@ cd AI-Trends-Intelligence-Platform
 
 ### 2. Environment Setup
 
-Create a `.env` file in the `frontend` directory with all required secrets (API keys, database credentials, etc.)
+Create a `.env` file in the `frontend` and another in the `backend` directories with all required secrets (API keys, database credentials, etc.) (see .env.example files)
 
 ### 3. Backend Setup
 
@@ -59,9 +59,8 @@ source venv/bin/activate
 ```
 
 #### Install Dependencies
-
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
 ### 4. Frontend Setup
@@ -112,11 +111,11 @@ npx tailwindcss -i ./src/assets/main.css -o ./src/assets/tailwind.css -w
 
 ### Backend (Azure)
 
-The backend is deployed to Azure and automatically updates via GitHub Actions workflows triggered by cron jobs.
+The backend is currently deployed to Azure and automatically updates via GitHub Actions workflows triggered by cron jobs.
 
 ### Frontend (Vercel)
 
-The frontend is hosted on Vercel and deploys automatically on push to the main branch.
+The frontend is currently hosted on Vercel and deploys automatically on push to the main branch.
 
 ### Database
 
@@ -127,6 +126,7 @@ The application uses Neon DB (serverless PostgreSQL) for data storage.
 ```
 AI-Trends-Intelligence-Platform/
 ├── backend/
+│   ├── requirements.txt   # Python dependencies
 │   ├── main.py           # FastAPI application
 │   └── ...
 ├── frontend/
@@ -137,13 +137,5 @@ AI-Trends-Intelligence-Platform/
 │   │   └── ...
 │   ├── .env              # Environment variables (not in repo)
 │   └── package.json
-├── requirements.txt      # Python dependencies
 └── venv/                 # Virtual environment (not in repo)
 ```
-
-## Contributing
-
-1. Create a new branch for your feature
-2. Make your changes
-3. Test locally
-4. Submit a pull request

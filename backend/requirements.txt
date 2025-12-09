@@ -6,7 +6,6 @@ starlette==0.49.3
 # Database
 SQLAlchemy==2.0.44
 psycopg[binary]==3.2.12
-alembic==1.15.0
 
 # API & External Services
 openai==2.8.0
