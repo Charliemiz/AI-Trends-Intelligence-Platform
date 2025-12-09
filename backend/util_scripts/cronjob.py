@@ -1,3 +1,10 @@
+"""Scheduled job to discover, summarize and persist trending articles.
+
+This script is intended to be run from a scheduler (cron, task scheduler)
+or invoked manually. It rotates through enabled sectors and uses Perplexity
+and other helpers to build and store article summaries.
+"""
+
 from backend.services.perplexity_service import perplexity_search_trends, perplexity_find_articles, perplexity_summarize, perplexity_impact_score
 from backend.services.source_services import extract_domain, filter_and_renumber_sources
 from backend.db.database import SessionLocal
@@ -9,6 +16,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def main():
+    """Main entrypoint for the cron job flow.
+
+    Orchestrates sector rotation, topic discovery, article search, summary
+    generation and persistence. Intended for use by a scheduler.
+    """
     logger.info("Starting cron job...")
     db = SessionLocal()
 
@@ -33,7 +45,7 @@ def main():
 
         if not trending_topics or len(trending_topics) < 2:
             logger.warning(f"Not enough valid AI-related topics found for {sector} ({len(trending_topics) if trending_topics else 0}/3)")
-            logger.warning(f"Skipping to next sector. Sector already advanced in rotation.")
+            logger.warning("Skipping to next sector. Sector already advanced in rotation.")
             return
 
         for trend in trending_topics:

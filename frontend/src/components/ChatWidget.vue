@@ -45,11 +45,11 @@
             <div
               v-for="(msg, idx) in messages"
               :key="idx"
-              :class="msg.role === 'user' ? 'text-right' : 'text-left'"
+              :class="['flex', msg.role === 'user' ? 'justify-end' : 'justify-start']"
             >
               <div
                 :class="[
-                  'inline-block px-4 py-2 rounded-lg text-sm',
+                  'px-4 py-2 rounded-lg text-sm max-w-[85%] break-words',
                   msg.role === 'user'
                     ? 'bg-blue-600 text-white'
                     : 'bg-slate-700 text-slate-100'
@@ -83,35 +83,143 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
+/**
+ * ChatWidget Component
+ * 
+ * A collapsible chat interface that appears on article detail pages.
+ * Manages chat sessions, conversation history, and real-time messaging
+ * with an AI analyst focused on the current article's content.
+ * 
+ * Features:
+ * - Auto-creates chat session when navigating to an article page
+ * - Auto-closes session when navigating away
+ * - Maintains conversation history tied to backend session
+ * - Displays initial greeting with article title
+ * - Handles loading states during session creation and messaging
+ */
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { apiRequest } from "@/utils/api";
 
 const route = useRoute();
+
+/** Whether the chat widget is expanded or collapsed */
 const isOpen = ref(false);
+
+/** Current user input in the message field */
 const input = ref("");
+
+/** Array of message objects with role ('user' or 'assistant') and content */
 const messages = ref([]);
+
+/** Current session ID (UUID) for backend session tracking */
 const sessionId = ref(null);
+
+/** Whether a message is currently being sent */
 const isLoading = ref(false);
+
+/** Whether a session is currently being created */
 const sessionCreating = ref(false);
 
-// Check if we're on an article detail page
+/**
+ * Check if we're currently on an article detail page
+ * @returns {boolean} True if current route matches /articles/:id pattern
+ */
 const isArticleDetail = computed(() => {
   // More reliable check - just check if URL matches pattern
   const matches = route.path.match(/^\/articles\/\d+$/);
   return !!matches;
 });
 
-// Extract article ID from route
+/**
+ * Extract article ID from the current route
+ * @returns {number|null} Article ID if on article page, null otherwise
+ */
 const articleId = computed(() => {
   const match = route.path.match(/^\/articles\/(\d+)$/);
   return match ? parseInt(match[1], 10) : null;
 });
 
-// Watch for route changes and create/close sessions
+/**
+ * Watch for route changes to manage session lifecycle
+ * - Closes session when leaving an article page
+ * - Creates session when entering an article page
+ */
 watch([isArticleDetail, articleId], async () => {
   // If we're leaving an article page, close the session
   if (!isArticleDetail.value && sessionId.value) {
+    await closeSession();
+    return;
+  }
+
+  // If we're entering an article page, create a new session
+  if (isArticleDetail.value && articleId.value && !sessionId.value) {
+    await createSession(articleId.value);
+  }
+});
+
+/**
+ * Create a chat session on component mount if on an article page
+ * Ensures session is ready when user first visits an article
+ */
+onMounted(async () => {
+  if (isArticleDetail.value && articleId.value && !sessionId.value) {
+    await createSession(articleId.value);
+  }
+});
+
+/**
+ * Create a chat session and initialize with article context
+ * 
+ * Fetches the full article data and sends it to the backend to create
+ * a session. The backend returns the session ID and initial greeting
+ * message which is displayed in the chat.
+ * 
+ * @param {number} id - The article ID to create a session for
+ */
+const createSession = async (id) => {
+  sessionCreating.value = true;
+  try {
+    // Fetch article for context
+    const article = await apiRequest(`/api/articles/${id}`, { method: "GET" });
+    const response = await apiRequest("/api/chat/session", {
+      method: "POST",
+      body: JSON.stringify({
+        article_id: id,
+        article_title: article?.title || "",
+        article_content: article?.content || "",
+        sources: article?.sources || [],
+        tags: article?.tags || [],
+        impact_score: article?.impact_score || null
+      })
+    });
+    sessionId.value = response.session_id;
+    // Use the initial messages (greeting) returned from the backend
+    messages.value = response.messages || [];
+    console.log(`Chat session created: ${sessionId.value} for article ${id}`);
+  } catch (err) {
+    console.error("Failed to create chat session:", err.message);
+    console.error("Error details:", err);
+    // Set fallback greeting on error
+    messages.value = [
+      {
+        role: "assistant",
+        content: "Hello! I'm here to answer any questions about this article."
+      }
+    ];
+  } finally {
+    sessionCreating.value = false;
+  }
+};
+
+/**
+ * Close the current chat session and clear local state
+ * 
+ * Sends a DELETE request to the backend to terminate the session
+ * and remove it from memory. Clears the local session ID and messages.
+ */
+const closeSession = async () => {
+  if (sessionId.value) {
     try {
       await apiRequest(`/api/chat/session/${sessionId.value}`, {
         method: "DELETE"
@@ -122,103 +230,16 @@ watch([isArticleDetail, articleId], async () => {
     }
     sessionId.value = null;
     messages.value = [];
-    return;
-  }
-
-  // If we're entering an article page, create a new session
-  if (isArticleDetail.value && articleId.value && !sessionId.value) {
-    sessionCreating.value = true;
-    try {
-      // Fetch article for context
-      const article = await apiRequest(`/api/articles/${articleId.value}`, { method: "GET" });
-      const response = await apiRequest("/api/chat/session", {
-        method: "POST",
-        body: JSON.stringify({
-          article_id: articleId.value,
-          article_title: article?.title || "",
-          article_content: article?.content || "",
-          sources: article?.sources || []
-        })
-      });
-      sessionId.value = response.session_id;
-      // Fetch article title for greeting
-      await addInitialGreeting(articleId.value);
-      console.log(`Chat session created: ${sessionId.value} for article ${articleId.value}`);
-    } catch (err) {
-      console.error("Failed to create chat session:", err.message);
-      console.error("Error details:", err);
-    } finally {
-      sessionCreating.value = false;
-    }
-  }
-});
-
-// Create a new chat session when component mounts on ArticleDetail
-onMounted(async () => {
-  if (isArticleDetail.value && articleId.value && !sessionId.value) {
-    sessionCreating.value = true;
-    try {
-      // Fetch article for context
-      const article = await apiRequest(`/api/articles/${articleId.value}`, { method: "GET" });
-      const response = await apiRequest("/api/chat/session", {
-        method: "POST",
-        body: JSON.stringify({
-          article_id: articleId.value,
-          article_title: article?.title || "",
-          article_content: article?.content || "",
-          sources: article?.sources || []
-        })
-      });
-      sessionId.value = response.session_id;
-      // Fetch article title for greeting
-      await addInitialGreeting(articleId.value);
-      console.log(`Chat session created on mount: ${sessionId.value} for article ${articleId.value}`);
-    } catch (err) {
-      console.error("Failed to create chat session:", err.message);
-      console.error("Error details:", err);
-    } finally {
-      sessionCreating.value = false;
-    }
-  }
-});
-
-// Close session when leaving the page
-onBeforeUnmount(async () => {
-  if (sessionId.value) {
-    try {
-      await apiRequest(`/api/chat/session/${sessionId.value}`, {
-        method: "DELETE"
-      });
-      console.log(`Chat session closed on unmount: ${sessionId.value}`);
-    } catch (err) {
-      console.error("Failed to close session:", err.message);
-    }
-  }
-});
-
-// Helper function to fetch article title and add initial greeting
-const addInitialGreeting = async (id) => {
-  try {
-    const article = await apiRequest(`/api/articles/${id}`, { method: "GET" });
-    const title = article?.title || "this article";
-    messages.value = [
-      {
-        role: "assistant",
-        content: `Hello! I'm here to answer any questions about "${title}".`
-      }
-    ];
-  } catch (err) {
-    console.error("Failed to fetch article title for greeting:", err.message);
-    // Fallback greeting if fetch fails
-    messages.value = [
-      {
-        role: "assistant",
-        content: "Hello! I'm here to answer any questions about this article."
-      }
-    ];
   }
 };
 
+/**
+ * Send a user message to the chat backend and display the response
+ * 
+ * Validates input, adds the user message to the UI immediately,
+ * sends it to the backend with the session ID, and appends the
+ * AI response to the conversation when received.
+ */
 const sendMessage = async () => {
   if (!input.value.trim() || !sessionId.value) return;
 

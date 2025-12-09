@@ -1,6 +1,26 @@
+"""Helpers for interacting with the Perplexity API.
+
+This module contains functions to search for trending topics, find
+articles, summarize multiple sources into an article, and estimate an
+impact score using Perplexity's chat/completion endpoints.
+
+Functions
+---------
+perplexity_search_trends
+    Find trending topics for a sector.
+perplexity_find_articles
+    Find articles given a query.
+perplexity_summarize
+    Summarize a list of sources into an article and extract tags.
+perplexity_impact_score
+    Estimate an impact score for an article.
+"""
+
 from backend.services.source_services import extract_domain, CREDIBLE_SOURCES, BLACKLISTED_SOURCES
 from backend.config import settings
-import re, requests, datetime
+import re
+import requests
+import datetime
 
 PERPLEXITY_ENDPOINT = "https://api.perplexity.ai/chat/completions"
 
@@ -145,7 +165,7 @@ def perplexity_find_articles(query: str, count: int = 5):
     
     # Fallback: parse from content if search_results is empty
     if not articles:
-        print(f"  search_results was empty, trying content parsing...")
+        print("  search_results was empty, trying content parsing...")
         content = data["choices"][0]["message"]["content"]
         print(f"  Content length: {len(content)} chars")
         
@@ -306,7 +326,7 @@ def perplexity_summarize(query: str, trusted_articles: list, uncertain_articles:
         print(f"  📎 Extracted {len(tags)} tags")
     else:
         main_content = content
-        print(f"No TAGS: found in response")
+        print("No TAGS: found in response")
     
     # Parse title and article
     lines = main_content.split("\n")  

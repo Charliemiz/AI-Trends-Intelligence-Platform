@@ -105,20 +105,56 @@
 </template>
 
 <script setup>
+/**
+ * ArticleList View Component
+ * 
+ * Displays a paginated, searchable list of AI trend articles.
+ * Shows article titles, tags, creation dates, and impact scores.
+ * Supports real-time search filtering and page navigation.
+ * 
+ * Features:
+ * - Paginated article listing with configurable page size
+ * - Real-time search filtering by article title
+ * - Interactive pagination controls (prev/next/direct page input)
+ * - Displays article metadata (tags, date, impact score)
+ * - Empty state when no articles match search criteria
+ * - Smooth scroll to top on page change
+ */
 import { ref, onMounted } from 'vue'
 import { apiRequest } from '@/utils/api'
 
+/** Array of article objects to display */
 const articles = ref([])
+
+/** Current search query string */
 const searchQuery = ref('')
+
+/** Current page number (1-indexed) */
 const currentPage = ref(1)
+
+/** Number of articles to display per page */
 const pageSize = ref(20)
+
+/** Total number of pages available */
 const totalPages = ref(0)
+
+/** Total count of articles matching current filters */
 const totalCount = ref(0)
 
+/**
+ * Fetch articles on component mount
+ */
 onMounted(async () => {
   await fetchArticles()
 })
 
+/**
+ * Fetch articles from the API with current pagination and search parameters
+ * 
+ * Constructs query parameters from current state (page, page_size, search)
+ * and updates the articles list along with pagination metadata. Scrolls
+ * the container to top after fetching.
+ */
 async function fetchArticles() {
   try {
     const query = new URLSearchParams({
@@ -148,12 +184,24 @@ async function fetchArticles() {
   }
 }
 
+/**
+ * Handle search input changes
+ * 
+ * Resets to page 1 when user types in the search box to ensure
+ * they see results from the beginning of the filtered list.
+ */
 async function OnSearchChange() {
   // Reset to page 1 when searching
   currentPage.value = 1
   await fetchArticles()
 }
 
+/**
+ * Navigate to the next page
+ * 
+ * Increments the page number and fetches articles if not already
+ * on the last page.
+ */
 function nextPage() {
   if (currentPage.value < totalPages.value) {
     currentPage.value += 1
@@ -161,6 +209,12 @@ function nextPage() {
   }
 }
 
+/**
+ * Navigate to the previous page
+ * 
+ * Decrements the page number and fetches articles if not already
+ * on the first page.
+ */
 function prevPage() {
   if (currentPage.value > 1) {
     currentPage.value -= 1
@@ -168,6 +222,12 @@ function prevPage() {
   }
 }
 
+/**
+ * Navigate to a specific page number
+ * 
+ * Validates the user-entered page number and fetches articles.
+ * If invalid, clamps the value to the valid range [1, totalPages].
+ */
 async function goToPage() {
   if (currentPage.value >= 1 && currentPage.value <= totalPages.value) {
     await fetchArticles()
@@ -177,6 +237,12 @@ async function goToPage() {
   }
 }
 
+/**
+ * Format a date string for display
+ * 
+ * @param {string} dateString - ISO date string from the API
+ * @returns {string} Formatted date like "Jan 15, 2024"
+ */
 function formatDate(dateString) {
   const options = { year: 'numeric', month: 'short', day: 'numeric' }
   return new Date(dateString).toLocaleDateString('en-US', options)
