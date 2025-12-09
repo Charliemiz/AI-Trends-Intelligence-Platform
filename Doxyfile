@@ -68,6 +68,11 @@ AUTOLINK_SUPPORT       = YES
 
 # Dot settings for diagrams (if HAVE_DOT = YES)
 # DOT_PATH             = 
-# CALL_GRAPH           = YES
-# CALLER_GRAPH         = YES
-# DEPENDENCY_GRAPH     = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+DEPENDENCY_GRAPH       = YES
+
+# Advanced call graph settings
+MAX_DOT_GRAPH_DEPTH    = 3
+DOT_GRAPH_MAX_NODES    = 50
+DOT_TRANSPARENT        = NO

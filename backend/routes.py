@@ -163,13 +163,11 @@ async def send_message(request: ChatRequest):
             session_id=request.session_id
         )
 
-        # Normalize the response object to a text string. openai_chat_service
-        # now returns {'response': str} for session mode; keep fallback for
-        # unexpected types.
+        # Extract response text from OpenAI API response
         if isinstance(response_obj, dict):
-            response_text = response_obj.get("response", "")
+            response_text = response_obj.get("response", "") or "I apologize, but I couldn't generate a response."
         else:
-            response_text = str(response_obj)
+            response_text = str(response_obj) if response_obj else "I apologize, but I couldn't generate a response."
         
         # Add assistant response to history
         add_message_to_session(request.session_id, "assistant", response_text)
