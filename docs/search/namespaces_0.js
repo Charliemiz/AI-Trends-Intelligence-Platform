@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['backend_0',['backend',['../namespacebackend.html',1,'']]],
+  ['backend_3a_3aconfig_1',['config',['../namespacebackend_1_1config.html',1,'backend']]],
+  ['backend_3a_3adb_2',['db',['../namespacebackend_1_1db.html',1,'backend']]],
+  ['backend_3a_3adb_3a_3acrud_3',['crud',['../namespacebackend_1_1db_1_1crud.html',1,'backend::db']]],
+  ['backend_3a_3adb_3a_3adatabase_4',['database',['../namespacebackend_1_1db_1_1database.html',1,'backend::db']]],
+  ['backend_3a_3adb_3a_3amodels_5',['models',['../namespacebackend_1_1db_1_1models.html',1,'backend::db']]],
+  ['backend_3a_3adb_3a_3aschemas_6',['schemas',['../namespacebackend_1_1db_1_1schemas.html',1,'backend::db']]],
+  ['backend_3a_3amain_7',['main',['../namespacebackend_1_1main.html',1,'backend']]],
+  ['backend_3a_3aroutes_8',['routes',['../namespacebackend_1_1routes.html',1,'backend']]],
+  ['backend_3a_3aservices_9',['services',['../namespacebackend_1_1services.html',1,'backend']]],
+  ['backend_3a_3aservices_3a_3aopenai_5fservice_10',['openai_service',['../namespacebackend_1_1services_1_1openai__service.html',1,'backend::services']]],
+  ['backend_3a_3aservices_3a_3aperplexity_5fservice_11',['perplexity_service',['../namespacebackend_1_1services_1_1perplexity__service.html',1,'backend::services']]],
+  ['backend_3a_3aservices_3a_3asector_5fservice_12',['sector_service',['../namespacebackend_1_1services_1_1sector__service.html',1,'backend::services']]],
+  ['backend_3a_3aservices_3a_3asession_5fservice_13',['session_service',['../namespacebackend_1_1services_1_1session__service.html',1,'backend::services']]],
+  ['backend_3a_3aservices_3a_3asource_5fservices_14',['source_services',['../namespacebackend_1_1services_1_1source__services.html',1,'backend::services']]],
+  ['backend_3a_3autil_5fscripts_15',['util_scripts',['../namespacebackend_1_1util__scripts.html',1,'backend']]],
+  ['backend_3a_3autil_5fscripts_3a_3acronjob_16',['cronjob',['../namespacebackend_1_1util__scripts_1_1cronjob.html',1,'backend::util_scripts']]],
+  ['backend_3a_3autil_5fscripts_3a_3asetup_5fdb_17',['setup_db',['../namespacebackend_1_1util__scripts_1_1setup__db.html',1,'backend::util_scripts']]]
+];

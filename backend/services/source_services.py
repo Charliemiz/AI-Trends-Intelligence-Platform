@@ -1,3 +1,10 @@
+"""Utilities for working with source URLs and article citations.
+
+This module provides helpers to extract a domain from a URL and to
+filter/renumber citations in an article so that only cited sources are
+kept and citation numbers are sequential.
+"""
+
 from urllib.parse import urlparse
 import logging
 import re
@@ -6,6 +13,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def extract_domain(url: str) -> str:
+    """Extract the canonical domain (without ``www.``) from a URL string.
+
+    :param url: The URL to parse.
+    :returns: Domain string without leading ``www.`` or an empty string on error.
+    """
     try:
         parsed = urlparse(url)
         domain = parsed.netloc
@@ -13,10 +25,18 @@ def extract_domain(url: str) -> str:
         if domain.startswith('www.'):
             domain = domain[4:]
         return domain
-    except:
+    except Exception:
         return ""
     
 def filter_and_renumber_sources(article_text: str, sources: list, sources_provided_count: int) -> tuple:
+    """Filter provided sources to only those cited in ``article_text`` and
+    renumber citation indices to be sequential.
+
+    :param article_text: Article content containing citation markers like ``[1]``.
+    :param sources: List of source dicts in the original order provided.
+    :param sources_provided_count: Count of sources originally provided (for stats).
+    :returns: Tuple of ``(renumbered_text, filtered_sources, stats_dict)``.
+    """
     # Extract all citation numbers from article
     citations = re.findall(r'\[(\d+)\]', article_text)
     

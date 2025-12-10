@@ -1,80 +1,89 @@
+"""OpenAI integration helpers.
+
+Provides a thin wrapper around the OpenAI client used to generate
+assistant responses in the context of article-based conversations.
+The service maintains session state and conversation history for
+multi-turn dialogues.
+
+Functions
+---------
+openai_chat_service
+    Primary entrypoint used by routes to request an assistant response.
+"""
+
 from openai import OpenAI
+from typing import Optional
+
 from backend.config import settings
-from typing import Optional, Union
-from backend.db.schemas import ChatMessage
+from backend.services.session_service import get_session
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-from backend.services.session_service import get_session
-
 def openai_chat_service(
-    data: Optional[ChatMessage] = None,
     message: Optional[str] = None,
     conversation_history: Optional[list] = None,
     article_id: Optional[int] = None,
-    session_id: Optional[str] = None
+    session_id: Optional[str] = None,
 ):
+    """Generate an AI response using OpenAI's chat completion API.
+
+    Builds a system prompt with article context (title, content, tags, impact score,
+    and sources) retrieved from the session store. Appends conversation history and
+    the current user message, then sends to GPT-4o-mini for response generation.
+
+    :param message: The user's message or question (required).
+    :type message: str or None
+    :param conversation_history: List of prior message dicts with 'role' and 'content' keys.
+    :type conversation_history: list or None
+    :param article_id: (Optional) Legacy article ID parameter; ignored if session_id is provided.
+    :type article_id: int or None
+    :param session_id: Unique session identifier to retrieve article context and conversation state.
+    :type session_id: str or None
+    :returns: Dict with key 'response' containing the AI-generated answer as a string.
+    :rtype: dict
+    :raises ValueError: If message parameter is not provided.
     """
-    Receives a message and returns an OpenAI response.
-    
-    Can be called in two ways:
-    1. Legacy: openai_chat_service(data=ChatMessage) - returns dict
-    2. Session-based: openai_chat_service(message=str, conversation_history=list, article_id=int) - returns str
-    """
-    
-    # Legacy mode for backward compatibility
-    if data is not None:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are an economic analyst providing clear, concise explanations."},
-                {"role": "user", "content": data.message},
-            ],
-        )
-        answer = response.choices[0].message.content
-        return {"response": answer}
-    
-    # Session-based mode with conversation history
+
     if message is not None:
         # Build messages array with conversation history
         messages = []
 
-        # Add system message with context if available
-        system_content = "You are an economic analyst providing clear, concise explanations."
-        context_str = ""
+        # Build system prompt with article context
+        system_prompt = (
+            "You are a helpful analyst assistant discussing the provided article. "
+            "Your primary focus is answering questions about the article's content, themes, and related topics. "
+            "You can help clarify terms, concepts, and provide context related to the article. "
+            "If a user asks a question completely unrelated to the article or its themes, "
+            "politely guide them back to the article topic. Return your answers unformatted in plaintext."
+        )
+
         if session_id:
             session = get_session(session_id)
             if session:
+                article_title = session.get("article_title")
                 article_content = session.get("article_content")
                 sources = session.get("sources", [])
-                # Try to get the article title from the first source or from a new session key if available
-                article_title = None
-                # If the frontend sends the title as part of sources[0], use it
-                if sources and sources[0].get('article_title'):
-                    article_title = sources[0]['article_title']
-                # Or, if the session has a 'article_title' key (future-proof)
-                if session.get('article_title'):
-                    article_title = session['article_title']
-                # Or, try to get it from the content (not ideal)
-                # If the frontend sends the title as a separate field, prefer that
-                if session.get('article_title'):
-                    article_title = session['article_title']
-                # Compose context string
+                tags = session.get("tags", [])
+                impact_score = session.get("impact_score")
+
+                # Append article context to system prompt
                 if article_title:
-                    context_str += f"\n\nArticle Title: {article_title}"
+                    system_prompt += f"\n\nArticle Title: {article_title}"
+                if impact_score is not None:
+                    system_prompt += f"\nImpact Score: {impact_score}"
+                if tags:
+                    tag_names = [t.get("name", "") for t in tags]
+                    system_prompt += f"\nTags: {', '.join(tag_names)}"
                 if article_content:
-                    context_str += f"\n\nArticle Content:\n{article_content}"
+                    system_prompt += f"\n\nArticle Content:\n{article_content}"
                 if sources:
-                    context_str += "\n\nSources:\n"
+                    system_prompt += "\n\nSources:\n"
                     for s in sources:
-                        context_str += f"- {s.get('title', '')} ({s.get('url', '')})\n"
+                        system_prompt += f"- {s.get('title', '')} ({s.get('url', '')})\n"
         elif article_id:
-            system_content += f"\nYou are discussing an article (ID: {article_id}). Use the conversation context to provide relevant insights."
+            system_prompt += f"\nYou are discussing an article (ID: {article_id}). Use the conversation context to provide relevant insights."
 
-        if context_str:
-            system_content += f"\n{context_str}"
-
-        messages.append({"role": "system", "content": system_content})
+        messages.append({"role": "system", "content": system_prompt})
 
         # Add conversation history
         if conversation_history:
@@ -90,6 +99,7 @@ def openai_chat_service(
         )
 
         answer = response.choices[0].message.content
-        return answer
-    
-    raise ValueError("Either 'data' (ChatMessage) or 'message' (str) parameter is required")
+        # Normalize return shape to a dict for consistency across callers
+        return {"response": answer}
+    else:
+        raise ValueError("message parameter is required for openai_chat_service")

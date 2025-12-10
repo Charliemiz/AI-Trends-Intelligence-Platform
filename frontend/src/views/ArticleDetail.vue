@@ -87,21 +87,44 @@
 </template>
 
 <script setup>
+/**
+ * ArticleDetail View Component
+ * 
+ * Displays a single article with full content, metadata, and sources.
+ * Renders markdown content as HTML and provides navigation back to the list.
+ * This view serves as the container for the ChatWidget component.
+ * 
+ * Features:
+ * - Fetches and displays full article details by ID
+ * - Renders markdown content with custom heading styles
+ * - Displays article metadata (title, date, impact score, tags)
+ * - Shows clickable source links with external link indicators
+ * - Back navigation to article list
+ * - Provides context for the ChatWidget component
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { apiRequest } from '@/utils/api'
 import { marked } from 'marked';
 
 const route = useRoute()
+
+/** Article data object containing all article information */
 const article = ref({ title: '', content: '', sources: [], tags: [], created_at: null, impact_score: -1 })
 
-// Custom renderer for headers
+/**
+ * Custom markdown renderer for styled headers
+ * Configures heading elements with consistent font weight and sizing
+ */
 const renderer = new marked.Renderer();
 renderer.heading = ({ text, depth }) => {
     return `<h${depth} style="font-weight: 700; margin-top: 1rem; font-size: 2rem;">${text}</h${depth}>`;
 };
 
-// Configure marked options for better rendering
+/**
+ * Configure marked library options for GitHub-flavored markdown
+ * Enables line breaks, header IDs, and custom rendering
+ */
 marked.setOptions({
     breaks: true,
     gfm: true,
@@ -110,17 +133,31 @@ marked.setOptions({
     renderer: renderer
 })
 
-// Computed property to render markdown to HTML
+/**
+ * Computed property that converts markdown content to HTML
+ * 
+ * @returns {string} HTML-rendered article content
+ */
 const renderedContent = computed(() => {
     if (!article.value.content) return ''
     return marked(article.value.content)
 })
 
+/**
+ * Fetch article data when component mounts
+ * Extracts article ID from route params
+ */
 onMounted(async () => {
     const data = await fetchArticleById(route.params.id)
     article.value = data || { title: '', content: '', sources: [], tags: [], created_at: null, impact_score: -1 }
 })
 
+/**
+ * Fetch a single article by ID from the API
+ * 
+ * @param {string|number} id - The article ID from the route
+ * @returns {Promise<Object>} Article object with all metadata
+ */
 async function fetchArticleById(id) {
     try {
         const res = await apiRequest(`/api/articles/${id}`, { method: 'GET' })
@@ -132,6 +169,12 @@ async function fetchArticleById(id) {
     }
 }
 
+/**
+ * Format a date string for display with time
+ * 
+ * @param {string} dateString - ISO date string from the API
+ * @returns {string} Formatted date like "January 15, 2024 at 10:30 AM"
+ */
 function formatDate(dateString) {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }
     return new Date(dateString).toLocaleDateString('en-US', options)

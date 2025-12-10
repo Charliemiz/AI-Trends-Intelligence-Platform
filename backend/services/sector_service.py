@@ -1,15 +1,34 @@
+"""Sector rotation utilities and configuration.
+
+This module exposes a manager class for persisting a rotating list of
+sectors to the database and utility functions for sector configuration.
+"""
+
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 
 # Manages sector rotation state using database storage. State is stored in the database instead of a JSON file.
 class SectorRotationManager:
+    """Manages sector rotation state persisted in the database.
+
+    This class maintains a queue of sectors and tracks which one should be
+    processed next in a round-robin fashion.
+    """
+
     def __init__(self, db: Session):
+        """Initialize the manager with a database session.
+
+        :param db: Active SQLAlchemy ``Session``.
+        """
         self.db = db
         self.state = self._load_state()
 
-    # Load rotation state from file
     def _load_state(self) -> dict:
+        """Load rotation state from the database.
+
+        :returns: State dict with current_index, sectors_queue, last_run, and cycle_count.
+        """
         from backend.db import models
         
         # Get or create state record
@@ -28,8 +47,8 @@ class SectorRotationManager:
                 "last_run": None,
                 "cycle_count": 0
             }
-    # Save rotation state to file
     def _save_state(self):
+        """Persist rotation state to the database."""
         from backend.db import models
         import json
         
@@ -49,16 +68,21 @@ class SectorRotationManager:
         
         self.db.commit()
     
-    # Initialize or reset the sectors queue
-    # Args: sectors: List of sectors names to cycle through
     def initialize_sectors(self, sectors: list):
+        """Initialize or reset the sectors queue.
+
+        :param sectors: List of sector names to cycle through.
+        """
         if not self.state["sectors_queue"] or set(sectors) != set(self.state["sectors_queue"]):
             self.state["sectors_queue"] = sectors.copy()
             self.state["current_index"] = 0
             self._save_state()
 
-    # Get the next sector in rotation
     def get_next_sectors(self) -> Optional[str]:
+        """Get the next sector in rotation and advance the pointer.
+
+        :returns: The next sector name, or ``None`` if no sectors configured.
+        """
         if not self.state["sectors_queue"]:
             return None
         
@@ -82,6 +106,10 @@ class SectorRotationManager:
     
     # Get current rotation state
     def get_current_state(self) -> dict:
+        """Get current rotation state information.
+
+        :returns: Dict with current_sector, sectors_remaining, total_sectors, cycle_count, last_run.
+        """
         return {
             "current_sector": self.state["sectors_queue"][self.state["current_index"]] 
                            if self.state["sectors_queue"] else None,
@@ -93,6 +121,7 @@ class SectorRotationManager:
     
     # Reset rotation to beginning
     def reset(self):
+        """Reset rotation to the beginning (index 0, cycle_count 0)."""
         self.state["current_index"] = 0
         self.state["cycle_count"] = 0
         self._save_state()
@@ -236,14 +265,25 @@ SECTOR_CONFIG = {
 
 # FUNCTIONS FOR TOPIC ROTATION
 
-# Get enabled sectors 
 def get_enabled_sectors():
+    """Return a list of enabled sector names from the configuration.
+
+    :returns: List of sector names which have ``enabled`` set to True.
+    """
     return [sector for sector, config in SECTOR_CONFIG.items() if config["enabled"]]
 
-# Get tags for a specific sector
 def get_sector_tags(sector):
+    """Return the list of tags/keywords for a given sector name.
+
+    :param sector: Name of the sector to retrieve tags for.
+    :returns: List of tag strings for the sector.
+    """
     return SECTOR_CONFIG.get(sector, {}).get("tags", [])
 
-# Get complete config for a sector
 def get_sector_config(sector):
+    """Return the full configuration dict for ``sector`` or an empty dict.
+
+    :param sector: Sector name to retrieve config for.
+    :returns: Configuration mapping for the sector, or empty dict if unknown.
+    """
     return SECTOR_CONFIG.get(sector, {})

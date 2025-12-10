@@ -1,3 +1,14 @@
+"""Application entrypoint and FastAPI app configuration.
+
+This module creates the FastAPI app instance, configures CORS origins, and
+mounts the API router used by the frontend.
+
+Variables
+---------
+app
+    The FastAPI application instance used by ASGI servers.
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routes import router

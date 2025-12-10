@@ -1,0 +1,78 @@
+# Doxyfile for AI-Trends-Intelligence-Platform
+# Configuration for documenting backend Python and frontend Vue/JavaScript files
+
+PROJECT_NAME           = "AI-Trends-Intelligence-Platform"
+PROJECT_NUMBER         = 1.0
+PROJECT_BRIEF          = "A platform for analyzing AI industry trends and sector rotation"
+
+# Input and output directories
+INPUT                  = backend frontend/src
+RECURSIVE              = YES
+OUTPUT_DIRECTORY       = html
+
+# File patterns to include
+FILE_PATTERNS          = *.py *.js *.vue *.ts
+EXCLUDE_PATTERNS       = */node_modules/* */__pycache__/* */dist/* */.venv/*
+
+# Exclude test files if desired (comment out to include)
+# EXCLUDE_PATTERNS      = */node_modules/* */__pycache__/* */dist/* */.venv/* **/test* **/spec.js **/__tests__/*
+
+# Source code settings
+SOURCE_BROWSER         = YES
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_MAN           = NO
+GENERATE_RTF           = NO
+
+# Documentation options
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+
+# Layout and appearance
+HTML_OUTPUT            = .
+HTML_DYNAMIC_SECTIONS  = YES
+DISABLE_INDEX          = NO
+GENERATE_TREEVIEW      = YES
+TREEVIEW_WIDTH         = 250
+
+# Search functionality
+SEARCHENGINE           = YES
+SERVER_BASED_SEARCH    = NO
+
+# Code example settings
+EXAMPLE_PATH           = backend
+EXAMPLE_RECURSIVE      = YES
+
+# Dot/GraphViz (optional, set to NO if not installed)
+HAVE_DOT               = YES
+
+# Strip common path prefix
+STRIP_FROM_PATH        = .
+STRIP_FROM_INC_PATH    = .
+
+# Quiet mode (reduce output verbosity)
+QUIET                  = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_BEFORE_BRIEF = NO
+WARN_NO_PARAMDOC       = NO
+
+# Python and JavaScript specific settings
+USE_MDFILE_AS_MAINPAGE = README.md
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES
+
+# Dot settings for diagrams (if HAVE_DOT = YES)
+# DOT_PATH             = 
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+DEPENDENCY_GRAPH       = YES
+
+# Advanced call graph settings
+MAX_DOT_GRAPH_DEPTH    = 3
+DOT_GRAPH_MAX_NODES    = 50
+DOT_TRANSPARENT        = NO
