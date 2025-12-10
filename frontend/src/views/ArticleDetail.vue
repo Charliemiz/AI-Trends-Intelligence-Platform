@@ -66,7 +66,7 @@
                     Sources
                 </h2>
                 <div class="grid gap-3">
-                    <a v-for="source in article.sources" :key="source.id" :href="source.url" target="_blank"
+                    <a v-for="(source, index) in article.sources" :key="source.id" :href="source.url" target="_blank"
                         class="group p-4 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 hover:border-blue-500 transition-all">
                         <div class="flex items-start gap-3">
                             <svg class="w-5 h-5 text-blue-400 mt-1 flex-shrink-0" fill="none" stroke="currentColor"
@@ -75,11 +75,14 @@
                                     d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
                                 </path>
                             </svg>
-                            <div class="flex-grow">
-                                <h3 class="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors">
-                                    {{ source.title }}
-                                </h3>
-                                <p class="text-slate-400 text-sm mt-1">{{ source.domain || source.url }}</p>
+                            <div class="flex justify-between w-full items-center">
+                                <div class="flex-col">
+                                    <h3 class="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors">
+                                        {{ source.title }}
+                                    </h3>
+                                    <p class="text-slate-400 text-sm mt-1">{{ source.domain || source.url }}</p>
+                                </div>
+                                <div class="font-semibold text-xl justify-center items-center">[{{ index + 1 }}]</div>
                             </div>
                         </div>
                     </a>
