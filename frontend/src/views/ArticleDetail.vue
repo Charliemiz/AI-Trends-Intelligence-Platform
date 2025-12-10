@@ -26,15 +26,18 @@
                     </svg>
                     {{ formatDate(article.created_at) }}
                 </span>
-                <span v-if="article.impact_score && article.impact_score > 0"
-                    class="flex items-center gap-2 text-yellow-400">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path
-                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
-                        </path>
-                    </svg>
-                    Impact: {{ article.impact_score }}
-                </span>
+                <!-- Impact + Sector -->
+                <div class="flex items-center gap-4">
+                    <span v-if="article.impact_score && article.impact_score > 0" class="px-3 py-1 rounded-full text-sm font-semibold 
+                    bg-yellow-900 border border-yellow-600 text-yellow-300">
+                        Impact: {{ article.impact_score }}
+                    </span>
+
+                    <span v-if="article.sector" class="px-3 py-1 rounded-full text-sm font-semibold 
+                    bg-emerald-900 border border-emerald-600 text-emerald-300">
+                        {{ article.sector }}
+                    </span>
+                </div>
             </div>
 
             <!-- Tags -->

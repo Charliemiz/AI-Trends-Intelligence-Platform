@@ -2,7 +2,8 @@
   <div class="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-y-auto">
     <!-- Header -->
     <div class="max-w-6xl mx-auto px-8 py-8">
-      <h1 class="text-5xl md:text-6xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+      <h1
+        class="text-5xl md:text-6xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
         AI Trends
       </h1>
       <p class="text-slate-400 text-lg mb-8">Stay informed with the latest AI insights</p>
@@ -11,38 +12,34 @@
       <div class="mb-12">
         <div class="relative flex items-center">
           <svg class="absolute left-4 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
-          <input
-            v-model="searchQuery"
-            @input="OnSearchChange"
-            type="text"
-            placeholder="Search Articles..."
-            class="w-full pl-12 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-          />
+          <input v-model="searchQuery" @input="OnSearchChange" type="text" placeholder="Search Articles..."
+            class="w-full pl-12 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
         </div>
       </div>
 
       <!-- Articles Grid -->
       <div v-if="articles.length > 0" class="space-y-4">
-        <router-link
-          v-for="article in articles"
-          :key="article.id"
-          :to="`/articles/${article.id}`"
-          class="group cursor-pointer p-6 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 hover:border-blue-500 transition-all duration-300 transform hover:scale-105 relative block"
-        >
-          <!-- Title -->
-          <h3 class="text-2xl font-bold text-white group-hover:text-blue-400 mb-2 transition-colors">
-            {{ article.title }}
-          </h3>
+        <router-link v-for="article in articles" :key="article.id" :to="`/articles/${article.id}`"
+          class="group cursor-pointer p-6 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 hover:border-blue-500 transition-all duration-300 transform hover:scale-105 relative block">
+          <!-- Title + Sector -->
+          <div class="flex items-center gap-3 mb-2">
+            <h3 class="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+              {{ article.title }}
+            </h3>
+
+            <span v-if="article.sector" class="shrink-0 px-2.5 py-0.5 text-xs font-semibold rounded-full 
+            bg-emerald-900 border border-emerald-600 text-emerald-300">
+              {{ article.sector }}
+            </span>
+          </div>
 
           <!-- Tags (if available) -->
           <div v-if="article.tags && article.tags.length > 0" class="flex flex-wrap gap-2 mb-4">
-            <span
-              v-for="tag in article.tags"
-              :key="tag.id"
-              class="px-3 py-1 bg-blue-900 border border-blue-600 text-blue-300 rounded-full text-xs font-semibold"
-            >
+            <span v-for="tag in article.tags" :key="tag.id"
+              class="px-3 py-1 bg-blue-900 border border-blue-600 text-blue-300 rounded-full text-xs font-semibold">
               {{ tag.name }}
             </span>
           </div>
@@ -62,33 +59,21 @@
 
       <!-- Pagination Controls -->
       <div v-if="totalPages > 1" class="mt-12 flex items-center justify-center gap-4">
-        <button
-          @click="prevPage"
-          :disabled="currentPage === 1"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed transition"
-        >
+        <button @click="prevPage" :disabled="currentPage === 1"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed transition">
           ← Previous
         </button>
-        
+
         <div class="flex items-center gap-2">
           <span class="text-slate-400">Page</span>
-          <input
-            v-model.number="currentPage"
-            @input="goToPage"
-            type="text"
-            inputmode="numeric"
-            :max="totalPages"
+          <input v-model.number="currentPage" @input="goToPage" type="text" inputmode="numeric" :max="totalPages"
             min="1"
-            class="w-16 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+            class="w-16 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500" />
           <span class="text-slate-400">of {{ totalPages }}</span>
         </div>
 
-        <button
-          @click="nextPage"
-          :disabled="currentPage === totalPages"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed transition"
-        >
+        <button @click="nextPage" :disabled="currentPage === totalPages"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed transition">
           Next →
         </button>
       </div>
@@ -96,7 +81,9 @@
       <!-- Empty State -->
       <div v-else-if="articles.length === 0" class="text-center py-16">
         <svg class="mx-auto w-16 h-16 text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v4m0 0a2 2 0 012 2v4a2 2 0 01-2 2m0 0H9m0 0a2 2 0 01-2-2V6a2 2 0 012-2m0 0H9"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v4m0 0a2 2 0 012 2v4a2 2 0 01-2 2m0 0H9m0 0a2 2 0 01-2-2V6a2 2 0 012-2m0 0H9">
+          </path>
         </svg>
         <p class="text-slate-400 text-lg">No articles found</p>
       </div>
@@ -165,12 +152,12 @@ async function fetchArticles() {
 
     const response = await apiRequest(`/api/articles?${query}`, { method: 'GET' })
     console.log('Fetched articles response:', response)
-    
+
     articles.value = response.items || []
     totalCount.value = response.total_count || 0
     totalPages.value = response.total_pages || 0
     currentPage.value = response.page || 1
-    
+
     // Scroll to top of the scrollable container smoothly
     const container = document.querySelector('.fixed.inset-0.overflow-y-auto')
     if (container) {
