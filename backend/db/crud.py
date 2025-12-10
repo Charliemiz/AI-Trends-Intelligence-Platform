@@ -76,7 +76,7 @@ def get_or_create_tags_bulk(db: Session, tags: list[str]):
     
     return tagIDs
 
-def create_article_with_sources_and_tags(db: Session, title: str, content: str, sources: list[dict], tags: list[str], impact_score: int = -1):
+def create_article_with_sources_and_tags(db: Session, title: str, content: str, sources: list[dict], tags: list[str], impact_score: int = -1, sector: str = "General"):
     """Create an article and link it to sources and tags in one transaction.
 
     :param db: Active SQLAlchemy ``Session``.
@@ -87,7 +87,7 @@ def create_article_with_sources_and_tags(db: Session, title: str, content: str, 
     :param impact_score: Integer impact score (default ``-1`` when unknown).
     :returns: The newly created :class:`models.Article` instance.
     """
-    article = create_article(db=db, title=title, content=content, impact_score=impact_score)
+    article = create_article(db=db, title=title, content=content, impact_score=impact_score, sector=sector)
     sourceIDs = get_or_create_sources_bulk(db=db, sources=sources)
     tagIDs = get_or_create_tags_bulk(db=db, tags=tags)
 
@@ -99,7 +99,7 @@ def create_article_with_sources_and_tags(db: Session, title: str, content: str, 
 
     return article
 
-def create_article(db: Session, title: str, content: str, impact_score: int = -1):
+def create_article(db: Session, title: str, content: str, impact_score: int = -1, sector: str = "General"):
     """Create and persist an :class:`models.Article`.
 
     The function commits the transaction and refreshes the returned instance.
@@ -110,7 +110,7 @@ def create_article(db: Session, title: str, content: str, impact_score: int = -1
     :param impact_score: Integer impact score (default ``-1`` when unknown).
     :returns: The newly created and refreshed :class:`models.Article` instance.
     """
-    article = models.Article(title=title, content=content, impact_score=impact_score)
+    article = models.Article(title=title, content=content, impact_score=impact_score, sector=sector)
     db.add(article)
     db.commit()
     db.refresh(article)
@@ -138,7 +138,7 @@ def get_all_articles(db: Session, search: str | None = None, limit: int = 20, of
     query = db.query(models.Article)
     
     if search:
-        query = query.filter(models.Article.title.ilike(f"%{search}%"))
+        query = query.filter(models.Article.title.ilike(f"%{search}%") | models.Article.tags.any(models.Tag.name.ilike(f"%{search}%")))
     
     # Get total count before applying limit/offset
     total_count = query.count()

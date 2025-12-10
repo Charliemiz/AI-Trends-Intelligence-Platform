@@ -119,7 +119,8 @@ def main():
                     content=renumbered_article,
                     sources=sources,
                     tags=result['tags'],
-                    impact_score=impact_score
+                    impact_score=impact_score,
+                    sector=sector
                 )
 
                 logger.info(f"Article ID {article.id}: Impact {impact_score}/10, Sources: {len(sources)}")

@@ -39,6 +39,7 @@ class Article(Base):
     content = Column(Text)
     created_at = Column(TIMESTAMP, server_default="CURRENT_TIMESTAMP", nullable=False)
     impact_score = Column(Integer, default=-1)
+    sector = Column(String, default="General")
     
     sources = relationship('Source', secondary=source_articles, back_populates='articles')
     tags = relationship('Tag', secondary='article_tags', back_populates='articles')

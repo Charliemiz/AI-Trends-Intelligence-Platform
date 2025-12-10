@@ -55,6 +55,7 @@ class ArticleSchema(BaseModel):
     sources: list[SourceSchema] = []
     tags: list[TagSchema] = []
     impact_score: int
+    sector: str
 
     class Config:
         from_attributes = True
@@ -75,6 +76,7 @@ class ArticleListSchema(BaseModel):
     created_at: datetime
     impact_score: int | None = None
     tags: list[TagSchema] = []
+    sector: str
 
     class Config:
         from_attributes = True
