@@ -141,12 +141,20 @@ marked.setOptions({
 
 /**
  * Computed property that converts markdown content to HTML
- * 
+ * Prior to markdown conversion, adjusts bold-only paragraphs to headings
  * @returns {string} HTML-rendered article content
  */
 const renderedContent = computed(() => {
     if (!article.value.content) return ''
-    return marked(article.value.content)
+
+    // Convert bold-only paragraph to real markdown heading
+    // Didn't want to mess with the ai generation side too much
+    let fixed = article.value.content.replace(
+        /^\*\*(.+?)\*\*$/gm,
+        '## $1'
+    )
+
+    return marked(fixed)
 })
 
 /**
