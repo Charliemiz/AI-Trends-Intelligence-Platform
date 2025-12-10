@@ -26,15 +26,18 @@
                     </svg>
                     {{ formatDate(article.created_at) }}
                 </span>
-                <span v-if="article.impact_score && article.impact_score > 0"
-                    class="flex items-center gap-2 text-yellow-400">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path
-                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
-                        </path>
-                    </svg>
-                    Impact: {{ article.impact_score }}
-                </span>
+                <!-- Impact + Sector -->
+                <div class="flex items-center gap-4">
+                    <span v-if="article.impact_score && article.impact_score > 0" class="px-3 py-1 rounded-full text-sm font-semibold 
+                    bg-yellow-900 border border-yellow-600 text-yellow-300">
+                        Impact: {{ article.impact_score }}
+                    </span>
+
+                    <span v-if="article.sector" class="px-3 py-1 rounded-full text-sm font-semibold 
+                    bg-emerald-900 border border-emerald-600 text-emerald-300">
+                        {{ article.sector }}
+                    </span>
+                </div>
             </div>
 
             <!-- Tags -->
@@ -63,7 +66,7 @@
                     Sources
                 </h2>
                 <div class="grid gap-3">
-                    <a v-for="source in article.sources" :key="source.id" :href="source.url" target="_blank"
+                    <a v-for="(source, index) in article.sources" :key="source.id" :href="source.url" target="_blank"
                         class="group p-4 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 hover:border-blue-500 transition-all">
                         <div class="flex items-start gap-3">
                             <svg class="w-5 h-5 text-blue-400 mt-1 flex-shrink-0" fill="none" stroke="currentColor"
@@ -72,11 +75,14 @@
                                     d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
                                 </path>
                             </svg>
-                            <div class="flex-grow">
-                                <h3 class="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors">
-                                    {{ source.title }}
-                                </h3>
-                                <p class="text-slate-400 text-sm mt-1">{{ source.domain || source.url }}</p>
+                            <div class="flex justify-between w-full items-center">
+                                <div class="flex-col">
+                                    <h3 class="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors">
+                                        {{ source.title }}
+                                    </h3>
+                                    <p class="text-slate-400 text-sm mt-1">{{ source.domain || source.url }}</p>
+                                </div>
+                                <div class="font-semibold text-xl justify-center items-center">[{{ index + 1 }}]</div>
                             </div>
                         </div>
                     </a>
@@ -135,12 +141,20 @@ marked.setOptions({
 
 /**
  * Computed property that converts markdown content to HTML
- * 
+ * Prior to markdown conversion, adjusts bold-only paragraphs to headings
  * @returns {string} HTML-rendered article content
  */
 const renderedContent = computed(() => {
     if (!article.value.content) return ''
-    return marked(article.value.content)
+
+    // Convert bold-only paragraph to real markdown heading
+    // Didn't want to mess with the ai generation side too much
+    let fixed = article.value.content.replace(
+        /^\*\*(.+?)\*\*$/gm,
+        '## $1'
+    )
+
+    return marked(fixed)
 })
 
 /**
