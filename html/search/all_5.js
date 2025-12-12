@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['chatrequest_0',['ChatRequest',['../classbackend_1_1db_1_1schemas_1_1_chat_request.html',1,'backend::db::schemas']]],
+  ['chatresponse_1',['ChatResponse',['../classbackend_1_1db_1_1schemas_1_1_chat_response.html',1,'backend::db::schemas']]],
+  ['chatwidget_2evue_2',['ChatWidget.vue',['../_chat_widget_8vue.html',1,'']]],
+  ['client_3',['client',['../namespacebackend_1_1services_1_1openai__service.html#a122c40d5d22c045e11bdc76cd0359086',1,'backend::services::openai_service']]],
+  ['close_5fchat_5fsession_4',['close_chat_session',['../namespacebackend_1_1routes.html#ac0e42228acd1d32777dc9ef5f2d8b9fb',1,'backend::routes']]],
+  ['config_5',['Config',['../classbackend_1_1db_1_1schemas_1_1_article_list_schema_1_1_config.html',1,'backend.db.schemas.ArticleListSchema.Config'],['../classbackend_1_1db_1_1schemas_1_1_article_schema_1_1_config.html',1,'backend.db.schemas.ArticleSchema.Config'],['../classbackend_1_1db_1_1schemas_1_1_source_schema_1_1_config.html',1,'backend.db.schemas.SourceSchema.Config'],['../classbackend_1_1db_1_1schemas_1_1_tag_schema_1_1_config.html',1,'backend.db.schemas.TagSchema.Config']]],
+  ['config_6',['config',['../namespaceenv.html#a5568485159882bb0d26691968a5c5711',1,'env']]],
+  ['config_2epy_7',['config.py',['../config_8py.html',1,'']]],
+  ['content_8',['content',['../classbackend_1_1db_1_1models_1_1_article.html#a95d4c0e56ed555ea8bbbf5978cfd41f9',1,'backend::db::models::Article']]],
+  ['create_5farticle_9',['create_article',['../namespacebackend_1_1db_1_1crud.html#a0b3ebf1446d1d600db9a7baed215b13d',1,'backend::db::crud']]],
+  ['create_5farticle_5fwith_5fsources_5fand_5ftags_10',['create_article_with_sources_and_tags',['../namespacebackend_1_1db_1_1crud.html#a02b345cd3ac6d01132292ee758567ce5',1,'backend::db::crud']]],
+  ['create_5fchat_5fsession_11',['create_chat_session',['../namespacebackend_1_1routes.html#a62ae6ec45814eef33abd80373d2f5ed0',1,'backend::routes']]],
+  ['create_5fsession_5fwith_5fcontext_12',['create_session_with_context',['../namespacebackend_1_1services_1_1session__service.html#a6228534ed782ab22e0b7dca671dff1d7',1,'backend::services::session_service']]],
+  ['created_5fat_13',['created_at',['../classbackend_1_1db_1_1models_1_1_article.html#a40b27f21a089655ef5ed30bb75b3e8dd',1,'backend::db::models::Article']]],
+  ['credible_5fsources_14',['CREDIBLE_SOURCES',['../namespacebackend_1_1services_1_1source__services.html#add83bf6f2244f8ca0db305994feea932',1,'backend::services::source_services']]],
+  ['cronjob_2epy_15',['cronjob.py',['../cronjob_8py.html',1,'']]],
+  ['crud_2epy_16',['crud.py',['../crud_8py.html',1,'']]]
+];

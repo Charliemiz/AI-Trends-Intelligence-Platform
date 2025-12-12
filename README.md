@@ -60,7 +60,7 @@ source venv/bin/activate
 
 #### Install Dependencies
 ```bash
-pip install -r backend/requirements.txt
+pip install -r requirements.txt
 ```
 
 ### 4. Frontend Setup
@@ -98,6 +98,34 @@ To watch and compile Tailwind CSS changes, run this in a separate terminal from 
 
 ```bash
 npx tailwindcss -i ./src/assets/main.css -o ./src/assets/tailwind.css -w
+```
+
+## Database Migrations
+
+This project uses [Alembic](https://alembic.sqlalchemy.org/) for database schema migrations.
+
+### Run Migrations
+
+To apply all pending migrations:
+
+```bash
+alembic upgrade head
+```
+
+### Create a New Migration
+
+After modifying database models:
+
+```bash
+alembic revision --autogenerate -m "Description of changes"
+```
+
+### Rollback Migration
+
+To rollback the last migration:
+
+```bash
+alembic downgrade -1
 ```
 
 ## Documentation Generation
@@ -169,7 +197,7 @@ The application uses Neon DB (serverless PostgreSQL) for data storage.
 ```
 AI-Trends-Intelligence-Platform/
 ├── backend/
-│   ├── requirements.txt   # Python dependencies
+│   ├── alembic/          # Database migrations
 │   ├── main.py           # FastAPI application
 │   └── ...
 ├── frontend/
@@ -180,5 +208,6 @@ AI-Trends-Intelligence-Platform/
 │   │   └── ...
 │   ├── .env              # Environment variables (not in repo)
 │   └── package.json
+├── requirements.txt      # Python dependencies
 └── venv/                 # Virtual environment (not in repo)
 ```

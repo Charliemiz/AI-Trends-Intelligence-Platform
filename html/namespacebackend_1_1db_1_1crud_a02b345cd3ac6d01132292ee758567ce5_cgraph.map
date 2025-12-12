@@ -1,0 +1,13 @@
+<map id="backend.db.crud.create_article_with_sources_and_tags" name="backend.db.crud.create_article_with_sources_and_tags">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,131,163,189"/>
+<area shape="rect" id="Node000002" href="$namespacebackend_1_1db_1_1crud.html#a0b3ebf1446d1d600db9a7baed215b13d" title=" " alt="" coords="215,5,372,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,128,159,92,209,58,222,53,217,57,212,62,162,97,119,132"/>
+<area shape="rect" id="Node000003" href="$namespacebackend_1_1db_1_1crud.html#aa1afbc957828cf18044413f334022e6f" title=" " alt="" coords="211,72,377,115"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="162,133,212,118,208,122,164,137"/>
+<area shape="rect" id="Node000004" href="$namespacebackend_1_1db_1_1crud.html#adf17ec640c77a359a393fc210c887864" title=" " alt="" coords="221,139,366,181"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="162,157,208,159,203,161,164,163"/>
+<area shape="rect" id="Node000005" href="$namespacebackend_1_1db_1_1crud.html#a18570f5b92acd625d17091bbb6a0dbf5" title=" " alt="" coords="223,205,364,248"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="163,182,212,199,207,201,163,188"/>
+<area shape="rect" id="Node000006" href="$namespacebackend_1_1db_1_1crud.html#a5abf1b1e18ef49ddc0d36d84510daaf5" title=" " alt="" coords="223,272,364,315"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="118,187,162,223,212,258,222,265,217,265,209,262,159,228,117,193"/>
+</map>

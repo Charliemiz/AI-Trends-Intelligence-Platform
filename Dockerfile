@@ -4,8 +4,8 @@ FROM python:3.9-slim
 WORKDIR /code
 
 # Install dependencies
-COPY ./backend/requirements.txt /code/backend/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /code/backend/requirements.txt
+COPY ./requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # Copy the entire project into the container
 COPY . /code
